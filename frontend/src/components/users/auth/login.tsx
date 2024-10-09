@@ -1,36 +1,34 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React from 'react';
 import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
-import bcrypt from 'bcrypt';
+import { signIn } from '@/auth';
 
-const Register = () => {
+const Login = () => {
 
     const onFinish = async (values: any) => {
-        // Thực hiện lưu thông tin user vào database (ví dụ qua API)
-        const hashedPassword = await bcrypt.hash(values.password, 10);
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            body: JSON.stringify({
+        console.log(values);
+        try {
+            const res = await signIn('credentials', {
+                redirect: false,  // Đảm bảo rằng bạn không redirect trực tiếp
                 email: values.email,
-                password: hashedPassword,
-                name: values.name,
-                phone: values.phone,
-                address: values.address
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+                password: values.password
+            });
 
-        if (response.ok) {
-            notification.success({ message: 'Registration successful' });
-            window.location.href = '/auth/login';
-        } else {
-            notification.error({ message: 'Registration failed' });
+            if (res?.error) {
+                notification.error({ message: res.error });
+
+            } else {
+                notification.success({ message: 'Login successful' });
+                // Redirect sau khi login thành công
+                window.location.href = '/dashboard';  // Hoặc bất kỳ trang nào sau khi đăng nhập
+            }
+        } catch (error) {
+            notification.error({ message: 'Login failed' });
         }
     };
 
@@ -50,35 +48,14 @@ const Register = () => {
                         padding: "0 10px",
                         color: "#1890ff",
                         fontWeight: "bold"
-                    }}>Register an Account</legend>
+                    }}>Login to Your Account</legend>
 
                     <Form
-                        name="register"
+                        name="login"
                         onFinish={onFinish}
                         autoComplete="off"
                         layout='vertical'
                     >
-                        <Form.Item
-                            label="Username"
-                            name="username"
-                            rules={[
-                                { required: true, message: 'Please input your username!' },
-                            ]}
-                        >
-                            <Input placeholder="Enter your username" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Phone"
-                            name="phone"
-                            rules={[
-                                { required: true, message: 'Please input your phone number!' },
-                                { pattern: /^\d{10,11}$/, message: 'Enter a valid phone number!' },
-                            ]}
-                        >
-                            <Input placeholder="Enter your phone number" />
-                        </Form.Item>
-
                         <Form.Item
                             label="Email"
                             name="email"
@@ -101,16 +78,6 @@ const Register = () => {
                             <Input.Password placeholder="Enter your password" />
                         </Form.Item>
 
-                        <Form.Item
-                            label="Address"
-                            name="address"
-                            rules={[
-                                { required: true, message: 'Please input your address!' }
-                            ]}
-                        >
-                            <Input placeholder="Enter your address" />
-                        </Form.Item>
-
                         <Form.Item>
                             <Button type="primary" htmlType="submit" style={{
                                 width: "100%",
@@ -118,7 +85,7 @@ const Register = () => {
                                 borderColor: "#1890ff",
                                 borderRadius: "5px"
                             }}>
-                                Register
+                                Login
                             </Button>
                         </Form.Item>
                     </Form>
@@ -132,7 +99,7 @@ const Register = () => {
                     <Divider />
 
                     <div style={{ textAlign: "center" }}>
-                        Already have an account? <Link href={"/auth/login"}>Login</Link>
+                        Don't have an account? <Link href={"/auth/register"}>Register</Link>
                     </div>
 
                 </fieldset>
@@ -141,4 +108,4 @@ const Register = () => {
     )
 }
 
-export default Register;
+export default Login;
