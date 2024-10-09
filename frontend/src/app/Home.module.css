@@ -1,0 +1,35 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #001529;
+    padding: 0 50px;
+}
+
+.logo img {
+    border-radius: 50%;
+}
+
+.heroSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px;
+    background-color: #f0f2f5;
+}
+
+.heroContent {
+    max-width: 600px;
+}
+
+.featuresSection {
+    padding: 50px;
+    background-color: #ffffff;
+}
+
+.footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #001529;
+    color: white;
+}
