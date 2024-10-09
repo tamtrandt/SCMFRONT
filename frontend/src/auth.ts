@@ -14,16 +14,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: {},
       },
       authorize: async (credentials) => {
-        let user = null
+        const user = null
  
         // logic to salt and hash password
-       user = {
-        "username":"Tam",
-        "email":"tam",
-        "password":"123",
-        "eeee":"eeee"
-        
-       }
+       
  
         if (!user) {
           // No user found, so this is their first attempt to login

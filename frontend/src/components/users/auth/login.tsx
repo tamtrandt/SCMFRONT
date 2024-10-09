@@ -7,30 +7,42 @@ import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { signIn } from '@/auth';
+import { useRouter } from 'next/navigation';
 
 const Login = () => {
+    const router = useRouter();
 
     const onFinish = async (values: any) => {
-        console.log(values);
         try {
-            const res = await signIn('credentials', {
-                redirect: false,  // Đảm bảo rằng bạn không redirect trực tiếp
-                email: values.email,
-                password: values.password
+            const response = await fetch('http://localhost:5000/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: values.email,
+                    password: values.password,
+                }),
             });
 
-            if (res?.error) {
-                notification.error({ message: res.error });
-
-            } else {
-                notification.success({ message: 'Login successful' });
-                // Redirect sau khi login thành công
-                window.location.href = '/dashboard';  // Hoặc bất kỳ trang nào sau khi đăng nhập
+            if (!response.ok) {
+                throw new Error('Login In Failed');
             }
-        } catch (error) {
-            notification.error({ message: 'Login failed' });
+
+            const data = await response.json();
+            // Lưu token vào cookies hoặc localStorage
+            localStorage.setItem('access_token', data.access_token);
+            notification.success({ message: 'Login successful!' });
+            router.push('/home'); // Điều hướng đến trang được bảo vệ
+        } catch (error: unknown) { // Đảm bảo kiểu của error là unknown
+            if (error instanceof Error) {
+                notification.error({ message: error.message || 'Login Actully Failed' });
+            } else {
+                notification.error({ message: 'An unknown error occurred' });
+            }
         }
     };
+
 
     return (
         <Row justify={"center"} style={{ marginTop: "50px" }}>
