@@ -1,38 +1,42 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 'use client'
-import React from 'react';
-import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
+import { Button, Col, Divider, Form, Input, message, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
-import bcrypt from 'bcrypt';
+import { useRouter } from 'next/navigation';
+import { isValidPhoneNumber } from 'libphonenumber-js';
+
+
 
 const Register = () => {
 
-    const onFinish = async (values: any) => {
-        // Thực hiện lưu thông tin user vào database (ví dụ qua API)
-        const hashedPassword = await bcrypt.hash(values.password, 10);
-        const response = await fetch('/api/register', {
-            method: 'POST',
-            body: JSON.stringify({
-                email: values.email,
-                password: hashedPassword,
-                name: values.name,
-                phone: values.phone,
-                address: values.address
-            }),
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+    const router = useRouter();
 
-        if (response.ok) {
-            notification.success({ message: 'Registration successful' });
-            window.location.href = '/auth/login';
-        } else {
-            notification.error({ message: 'Registration failed' });
+    // Xử lý khi form được submit
+    const onFinish = async (values: any) => {
+        try {
+            const res = await fetch("http://localhost:5000/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(values),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                message.success("Register successful! Please verify your account.");
+                router.push("/auth/verify"); // Điều hướng đến trang verify
+            } else {
+                message.error(data.message || "Registration failed. Please try again.");
+            }
+        } catch (error) {
+            message.error("An error occurred. Please try again.");
         }
     };
+
+
 
     return (
         <Row justify={"center"} style={{ marginTop: "50px" }}>
@@ -51,6 +55,7 @@ const Register = () => {
                         color: "#1890ff",
                         fontWeight: "bold"
                     }}>Register an Account</legend>
+
 
                     <Form
                         name="register"
@@ -73,7 +78,12 @@ const Register = () => {
                             name="phone"
                             rules={[
                                 { required: true, message: 'Please input your phone number!' },
-                                { pattern: /^\d{10,11}$/, message: 'Enter a valid phone number!' },
+                                {
+                                    validator: (_, value) =>
+                                        value && isValidPhoneNumber(value, 'VN')
+                                            ? Promise.resolve()
+                                            : Promise.reject(new Error('Enter a valid phone number!')),
+                                },
                             ]}
                         >
                             <Input placeholder="Enter your phone number" />
@@ -142,3 +152,4 @@ const Register = () => {
 }
 
 export default Register;
+

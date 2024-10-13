@@ -16,7 +16,7 @@ const AdminHeader = () => {
         {
             key: '1',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
+                <a target="_blank" rel="noopener noreferrer" href="">
                     1st menu item
                 </a>
             ),
@@ -24,7 +24,7 @@ const AdminHeader = () => {
         {
             key: '2',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
+                <a target="_blank" rel="noopener noreferrer" href="">
                     2nd menu item (disabled)
                 </a>
             ),
@@ -34,7 +34,7 @@ const AdminHeader = () => {
         {
             key: '3',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
+                <a target="_blank" rel="noopener noreferrer" href="">
                     3rd menu item (disabled)
                 </a>
             ),
