@@ -7,57 +7,156 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-const Login = () => {
+import { useState } from 'react';
+// const Login = () => {
 
+//     const router = useRouter();
+
+//     const onFinish = async (values: any) => {
+
+//     };
+
+
+//     return (
+//         <Row justify={"center"} style={{ marginTop: "50px" }}>
+//             <Col xs={24} md={16} lg={8}>
+//                 <fieldset style={{
+//                     padding: "30px",
+//                     margin: "10px",
+//                     border: "2px solid #ccc",
+//                     borderRadius: "10px",
+//                     boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+//                     backgroundColor: "#f9f9f9"
+//                 }}>
+//                     <legend style={{
+//                         fontSize: "1.5em",
+//                         padding: "0 10px",
+//                         color: "#1890ff",
+//                         fontWeight: "bold"
+//                     }}>Login to Your Account</legend>
+
+//                     <Form
+//                         name="login"
+//                         onFinish={onFinish}
+//                         autoComplete="off"
+//                         layout='vertical'
+//                     >
+//                         <Form.Item
+//                             label="Email"
+//                             name="email"
+//                             rules={[
+//                                 { required: true, message: 'Please input your email!' },
+//                                 { type: 'email', message: 'The input is not valid email!' }
+//                             ]}
+//                         >
+//                             <Input placeholder="Enter your email" />
+//                         </Form.Item>
+
+//                         <Form.Item
+//                             label="Password"
+//                             name="password"
+//                             rules={[
+//                                 { required: true, message: 'Please input your password!' },
+//                                 { min: 6, message: 'Password must be at least 6 characters!' }
+//                             ]}
+//                         >
+//                             <Input.Password placeholder="Enter your password" />
+//                         </Form.Item>
+
+//                         <Form.Item>
+//                             <Button type="primary" htmlType="submit" style={{
+//                                 width: "100%",
+//                                 backgroundColor: "#1890ff",
+//                                 borderColor: "#1890ff",
+//                                 borderRadius: "5px"
+//                             }}>
+//                                 Login
+//                             </Button>
+//                         </Form.Item>
+//                     </Form>
+
+//                     <Link href={"/"}>
+//                         <Button type="link" icon={<ArrowLeftOutlined />} style={{ paddingLeft: "0" }}>
+//                             Back to Homepage
+//                         </Button>
+//                     </Link>
+
+//                     <Divider />
+
+//                     <div style={{ textAlign: "center" }}>
+//                         Don't have an account? <Link href={"/auth/register"}>Register</Link>
+//                     </div>
+
+//                 </fieldset>
+//             </Col>
+//         </Row>
+//     )
+// }
+
+// export default Login;
+
+
+
+const Login = () => {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     const onFinish = async (values: any) => {
+        setLoading(true);
         const { email, password } = values;
+
         const result = await signIn('credentials', {
+            redirect: false,
             email,
             password,
-            redirect: false, // Ngăn việc redirect tự động, xử lý thủ công
         });
+        console.log(result); // In log để xem thông tin trả về từ signIn
 
-        if (result?.ok) {
-            message.success('Login successful!');
-            router.push('/home'); // Điều hướng tới trang được bảo vệ
+        if (result?.error) {
+            message.error('Invalid email or password');
+            setLoading(false);
         } else {
-            message.error('Invalid email or password.');
+            message.success('Login successful!');
+            router.push('/home'); // Chuyển hướng đến trang dashboard
         }
     };
-
 
     return (
         <Row justify={"center"} style={{ marginTop: "50px" }}>
             <Col xs={24} md={16} lg={8}>
-                <fieldset style={{
-                    padding: "30px",
-                    margin: "10px",
-                    border: "2px solid #ccc",
-                    borderRadius: "10px",
-                    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                    backgroundColor: "#f9f9f9"
-                }}>
-                    <legend style={{
-                        fontSize: "1.5em",
-                        padding: "0 10px",
-                        color: "#1890ff",
-                        fontWeight: "bold"
-                    }}>Login to Your Account</legend>
+                <fieldset
+                    style={{
+                        padding: "30px",
+                        margin: "10px",
+                        border: "2px solid #ccc",
+                        borderRadius: "10px",
+                        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                        backgroundColor: "#f9f9f9",
+                    }}
+                >
+                    <legend
+                        style={{
+                            fontSize: "1.5em",
+                            padding: "0 10px",
+                            color: "#1890ff",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        Login to Your Account
+                    </legend>
 
                     <Form
                         name="login"
                         onFinish={onFinish}
                         autoComplete="off"
-                        layout='vertical'
+                        layout="vertical"
                     >
                         <Form.Item
                             label="Email"
                             name="email"
                             rules={[
                                 { required: true, message: 'Please input your email!' },
-                                { type: 'email', message: 'The input is not valid email!' }
+                                { type: 'email', message: 'The input is not valid email!' },
                             ]}
                         >
                             <Input placeholder="Enter your email" />
@@ -68,26 +167,35 @@ const Login = () => {
                             name="password"
                             rules={[
                                 { required: true, message: 'Please input your password!' },
-                                { min: 6, message: 'Password must be at least 6 characters!' }
+                                { min: 6, message: 'Password must be at least 6 characters!' },
                             ]}
                         >
                             <Input.Password placeholder="Enter your password" />
                         </Form.Item>
 
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" style={{
-                                width: "100%",
-                                backgroundColor: "#1890ff",
-                                borderColor: "#1890ff",
-                                borderRadius: "5px"
-                            }}>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                style={{
+                                    width: "100%",
+                                    backgroundColor: "#1890ff",
+                                    borderColor: "#1890ff",
+                                    borderRadius: "5px",
+                                }}
+                                loading={loading} // Hiển thị loading trong khi đăng nhập
+                            >
                                 Login
                             </Button>
                         </Form.Item>
                     </Form>
 
                     <Link href={"/"}>
-                        <Button type="link" icon={<ArrowLeftOutlined />} style={{ paddingLeft: "0" }}>
+                        <Button
+                            type="link"
+                            icon={<ArrowLeftOutlined />}
+                            style={{ paddingLeft: "0" }}
+                        >
                             Back to Homepage
                         </Button>
                     </Link>
@@ -97,11 +205,10 @@ const Login = () => {
                     <div style={{ textAlign: "center" }}>
                         Don't have an account? <Link href={"/auth/register"}>Register</Link>
                     </div>
-
                 </fieldset>
             </Col>
         </Row>
-    )
-}
+    );
+};
 
 export default Login;
