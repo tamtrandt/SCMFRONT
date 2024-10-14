@@ -1,49 +1,57 @@
-'use client'
+"use client";
 
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Button, Layout } from 'antd';
-import { useContext } from 'react';
-import { DownOutlined, SmileOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, PoweroffOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Layout, message } from 'antd';
+import { useContext, useEffect, useState } from 'react';
+import { DownOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
 import { AdminContext } from './animation';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 const AdminHeader = () => {
     const { Header } = Layout;
     const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
+    const router = useRouter(); // Hook để điều hướng trang
+
+    const [username, setUsername] = useState(); // Khởi tạo với giá trị mặc định
+
+    useEffect(() => {
+        const userInfo = JSON.parse(Cookies.get('userInfo') || '{}'); // Lấy thông tin người dùng từ cookie
+        if (userInfo.username) {
+            setUsername(userInfo.username); // Cập nhật tên người dùng
+        }
+    }, []); // Chạy một lần khi component được mount
+
+    const handleLogout = () => {
+        Cookies.remove('userInfo'); // Xóa thông tin người dùng khỏi cookies
+        Cookies.remove('access_token'); // Xóa access token khỏi cookies (nếu bạn lưu ở đây)
+
+        router.push('/auth/login'); // Chuyển hướng đến trang đăng nhập
+        message.success("Logout successful!"); // Hiển thị thông báo
+    };
 
     const items: MenuProps['items'] = [
         {
             key: '1',
             label: (
-                <a target="_blank" rel="noopener noreferrer" href="">
-                    1st menu item
-                </a>
+                <span>
+                    <UserOutlined style={{ marginRight: 8 }} /> {/* Icon cho Profile */}
+                    Profile
+                </span>
             ),
         },
         {
-            key: '2',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="">
-                    2nd menu item (disabled)
-                </a>
-            ),
-            icon: <SmileOutlined />,
-            disabled: true,
-        },
-        {
-            key: '3',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="">
-                    3rd menu item (disabled)
-                </a>
-            ),
-            disabled: true,
-        },
-        {
-            key: '4',
+            key: '0',
             danger: true,
-            label: 'a danger item',
+            label: (
+                <span>
+                    <PoweroffOutlined style={{ marginRight: 8 }} /> {/* Icon cho Logout */}
+                    Logout
+                </span>
+            ),
+            onClick: handleLogout, // Thêm hàm gọi khi nhấn
         },
     ];
 
@@ -73,14 +81,14 @@ const AdminHeader = () => {
                         style={{ color: "unset", lineHeight: "0 !important", marginRight: 20 }}
                     >
                         <Space>
-                            Welcome Admin
+                            Welcome {username} {/* Hiển thị tên người dùng */}
                             <DownOutlined />
                         </Space>
                     </a>
                 </Dropdown>
             </Header>
         </>
-    )
+    );
 }
 
 export default AdminHeader;

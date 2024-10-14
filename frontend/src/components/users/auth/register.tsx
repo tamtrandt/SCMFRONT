@@ -11,10 +11,8 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 
 
 const Register = () => {
-
     const router = useRouter();
 
-    // Xử lý khi form được submit
     const onFinish = async (values: any) => {
         try {
             const res = await fetch("http://localhost:5000/auth/register", {
@@ -26,13 +24,13 @@ const Register = () => {
             const data = await res.json();
 
             if (res.ok) {
-                message.success("Register successful! Please verify your account.");
-                router.push("/auth/verify"); // Điều hướng đến trang verify
+                message.success("Registration successful! Check your email for verification.");
+                router.push("/auth/verify");
             } else {
-                message.error(data.message || "Registration failed. Please try again.");
+                message.error(data.message);
             }
         } catch (error) {
-            message.error("An error occurred. Please try again.");
+            message.error("Registration failed. Please try again.");
         }
     };
 
