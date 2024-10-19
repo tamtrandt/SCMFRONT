@@ -14,35 +14,31 @@ const Login = () => {
 
     const onFinish = async (values: any) => {
         try {
-            const res = await fetch("http://localhost:5000/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
+            const response = await fetch('http://localhost:5000/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(values),
             });
 
-            const data = await res.json();
+            const data = await response.json();
 
-            if (res.ok) {
-                message.success("Login successful!");
-
-                // Lưu access token và thông tin người dùng vào cookies
-                Cookies.set('access_token', data.access_token, { expires: 1 }); // Cookie hết hạn sau 1 ngày
-                Cookies.set('userInfo', JSON.stringify(data.user), { expires: 1 }); // Cookie hết hạn sau 1 ngày
-
-                // Lấy user info từ cookies
-                const userInfo = JSON.parse(Cookies.get('userInfo') ?? '{}'); // Giá trị mặc định là một chuỗi rỗng
-
-                // Chuyển hướng dựa trên vai trò người dùng
-                const role = userInfo.role; // Lấy vai trò từ thông tin người dùng
-                router.push(role === "admin" ? "/dashboard" : "/home");
-            } else {
-                message.error(data.message);
-                if (data.message.includes("Account not verified")) {
-                    router.push("/auth/verify");
-                }
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed');
             }
-        } catch (error) {
-            message.error("Login failed. Please try again.");
+
+            // Lưu access token vào cookies
+            Cookies.set('access_token', data.access_token);
+
+            // Điều hướng dựa vào quyền truy cập
+            if (data.role === 'admin') {
+                router.push('/dashboard');
+            } else {
+                router.push('/home');
+            }
+        } catch (error: any) {
+            message.error(error.message);
         }
     };
 
@@ -75,7 +71,15 @@ const Login = () => {
                             name="email"
                             rules={[
                                 { required: true, message: 'Please input your email!' },
-                                { type: 'email', message: 'The input is not valid email!' }
+                                { type: 'email', message: '' },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && !value.endsWith('@gmail.com')) {
+                                            return Promise.reject(new Error('Email must be a @gmail.com'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
                             ]}
                         >
                             <Input placeholder="Enter your email" />
@@ -86,7 +90,17 @@ const Login = () => {
                             name="password"
                             rules={[
                                 { required: true, message: 'Please input your password!' },
-                                { min: 6, message: 'Password must be at least 6 characters!' }
+                                {
+                                    min: 6,
+                                },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(value)) {
+                                            return Promise.reject(new Error('Password must include at least uppercase letter, lowercase letter, number, and special character!'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
                             ]}
                         >
                             <Input.Password placeholder="Enter your password" />

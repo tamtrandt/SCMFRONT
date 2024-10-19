@@ -18,7 +18,7 @@ const AdminHeader = () => {
     const [username, setUsername] = useState(); // Khởi tạo với giá trị mặc định
 
     useEffect(() => {
-        const userInfo = JSON.parse(Cookies.get('userInfo') || '{}'); // Lấy thông tin người dùng từ cookie
+        const userInfo = JSON.parse(Cookies.get('userInfo') || 'ADMIN'); // Lấy thông tin người dùng từ cookie
         if (userInfo.username) {
             setUsername(userInfo.username); // Cập nhật tên người dùng
         }

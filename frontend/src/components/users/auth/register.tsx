@@ -66,25 +66,20 @@ const Register = () => {
                             name="username"
                             rules={[
                                 { required: true, message: 'Please input your username!' },
-                            ]}
-                        >
-                            <Input placeholder="Enter your username" />
-                        </Form.Item>
-
-                        <Form.Item
-                            label="Phone"
-                            name="phone"
-                            rules={[
-                                { required: true, message: 'Please input your phone number!' },
                                 {
-                                    validator: (_, value) =>
-                                        value && isValidPhoneNumber(value, 'VN')
-                                            ? Promise.resolve()
-                                            : Promise.reject(new Error('Enter a valid phone number!')),
+                                    validator: (_, value) => {
+                                        if (value) {
+                                            const regex = /^[A-Za-zÀ-ÿ\-\'\.]+$/;
+                                            if (!regex.test(value)) {
+                                                return Promise.reject(new Error('Username can only contain letters, hyphens, and apostrophes.'));
+                                            }
+                                        }
+                                        return Promise.resolve();
+                                    },
                                 },
                             ]}
                         >
-                            <Input placeholder="Enter your phone number" />
+                            <Input placeholder="Enter your username" />
                         </Form.Item>
 
                         <Form.Item
@@ -92,7 +87,15 @@ const Register = () => {
                             name="email"
                             rules={[
                                 { required: true, message: 'Please input your email!' },
-                                { type: 'email', message: 'The input is not valid email!' }
+                                { type: 'email', message: '' },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && !value.endsWith('@gmail.com')) {
+                                            return Promise.reject(new Error('Email must be a @gmail.com'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
                             ]}
                         >
                             <Input placeholder="Enter your email" />
@@ -103,10 +106,36 @@ const Register = () => {
                             name="password"
                             rules={[
                                 { required: true, message: 'Please input your password!' },
-                                { min: 6, message: 'Password must be at least 6 characters!' }
+                                {
+                                    min: 6,
+                                },
+                                {
+                                    validator: (_, value) => {
+                                        if (value && !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/.test(value)) {
+                                            return Promise.reject(new Error('Password must include at least uppercase letter, lowercase letter, number, and special character!'));
+                                        }
+                                        return Promise.resolve();
+                                    },
+                                },
                             ]}
                         >
                             <Input.Password placeholder="Enter your password" />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Phone Number"
+                            name="phone"
+                            rules={[
+                                { required: true },
+                                {
+                                    validator: (_, value) =>
+                                        value && isValidPhoneNumber(value, 'VN')
+                                            ? Promise.resolve()
+                                            : Promise.reject(new Error('Enter a valid phone number!')),
+                                },
+                            ]}
+                        >
+                            <Input placeholder="Enter your phone number" />
                         </Form.Item>
 
                         <Form.Item
