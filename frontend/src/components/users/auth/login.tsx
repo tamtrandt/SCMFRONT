@@ -7,42 +7,57 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import Cookies from 'js-cookie';
+import { signIn } from 'next-auth/react';
+import { loginUser } from '@/api/auth';
+import Cookies from "js-cookie";
+
+
 const Login = () => {
 
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
-
-    const onFinish = async (values: any) => {
+    const onFinish = async (values: { email: string; password: string }) => {
         try {
-            const response = await fetch('http://localhost:5000/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(values),
-            });
+            // Gọi hàm loginUser từ auth.ts
+            const data = await loginUser(values);
+            console.log(data);
 
-            const data = await response.json();
+            // Lưu user vào localStorage (nếu chưa thực hiện trong loginUser)
+            //localStorage.setItem("user_data", JSON.stringify(data.user));
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
+            // Lấy dữ liệu người dùng từ localStorage
+            const userDataString = localStorage.getItem("user_data");
+            let userData;
+
+            if (userDataString) {
+                userData = JSON.parse(userDataString); // Chuyển đổi chuỗi JSON thành đối tượng
             }
 
-            // Lưu access token vào cookies
-            Cookies.set('access_token', data.access_token);
+            // Kiểm tra trạng thái tài khoản
+            if (!userData.isactive) {
+                message.error("Account is not active."); // Hiển thị thông báo nếu tài khoản không hoạt động
+                return; // Dừng việc thực hiện nếu tài khoản không hoạt động
+            }
 
-            // Điều hướng dựa vào quyền truy cập
-            if (data.role === 'admin') {
-                router.push('/dashboard');
+            // Điều hướng dựa trên role nếu tài khoản đang hoạt động
+            if (userData.role === "admin") {
+                router.push("/dashboard");
             } else {
-                router.push('/home');
+                router.push("/home");
             }
+
         } catch (error: any) {
-            message.error(error.message);
+            message.error(error.message || "Login failed. Please try again.");
         }
     };
 
+
+
+
+
+
     return (
+
         <Row justify={"center"} style={{ marginTop: "50px" }}>
             <Col xs={24} md={16} lg={8}>
                 <fieldset style={{
@@ -63,6 +78,7 @@ const Login = () => {
                     <Form
                         name="login"
                         onFinish={onFinish}
+
                         autoComplete="off"
                         layout='vertical'
                     >
@@ -114,9 +130,13 @@ const Login = () => {
                                 borderRadius: "5px"
                             }}>
                                 Login
+
+
                             </Button>
                         </Form.Item>
                     </Form>
+
+
 
                     <Link href={"/"}>
                         <Button type="link" icon={<ArrowLeftOutlined />} style={{ paddingLeft: "0" }}>
@@ -124,16 +144,25 @@ const Login = () => {
                         </Button>
                     </Link>
 
+
                     <Divider />
 
                     <div style={{ textAlign: "center" }}>
-                        Don't have an account? <Link href={"/auth/register"}>Register</Link>
+                        Account isn't active? <Link href={"/auth/verify"}>Verify</Link>
                     </div>
+
+                    <div style={{ textAlign: "center" }}>
+                        Don't have an account? <Link href={"/auth/register"}>Register Now</Link>
+                    </div>
+
 
                 </fieldset>
             </Col>
         </Row>
     )
+
+
+
 }
 
 export default Login;

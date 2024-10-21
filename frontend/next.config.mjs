@@ -2,10 +2,10 @@
 const nextConfig = {
     reactStrictMode: true,
     compiler: {
-        styledComponents: true,  // Kích hoạt styled-components nếu cần
+        styledComponents: true,
     },
     webpack: (config) => {
-        // Tùy chỉnh Webpack để sử dụng Babel
+
         config.module.rules.push({
             test: /\.js$|\.jsx$|\.ts$|\.tsx$/,
             exclude: /node_modules/,
@@ -13,12 +13,15 @@ const nextConfig = {
                 loader: 'babel-loader',
                 options: {
                     presets: ['next/babel'],
-                    plugins: [['styled-components', { ssr: true }]],  // Plugin cho styled-components
+                    plugins: [['styled-components', { ssr: true }]],
                 },
             },
         });
 
         return config;
+    },
+    experimental: {
+
     },
 };
 

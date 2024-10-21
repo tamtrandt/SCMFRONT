@@ -18,14 +18,21 @@ const AdminHeader = () => {
     const [username, setUsername] = useState(); // Khởi tạo với giá trị mặc định
 
     useEffect(() => {
-        const userInfo = JSON.parse(Cookies.get('userInfo') || 'ADMIN'); // Lấy thông tin người dùng từ cookie
-        if (userInfo.username) {
-            setUsername(userInfo.username); // Cập nhật tên người dùng
+        const userInfo = localStorage.getItem('user_data'); // Lấy thông tin người dùng từ localStorage
+        if (userInfo) {
+            const parsedUserInfo = JSON.parse(userInfo); // Parse chuỗi JSON thành object
+            if (parsedUserInfo.email) {
+                // Tách tên người dùng từ email
+                const emailParts = parsedUserInfo.email.split('@');
+                if (emailParts.length > 0) {
+                    setUsername(emailParts[0]); // Cập nhật tên người dùng (phần trước @)
+                }
+            }
         }
-    }, []); // Chạy một lần khi component được mount
+    }, []);
 
     const handleLogout = () => {
-        Cookies.remove('userInfo'); // Xóa thông tin người dùng khỏi cookies
+        localStorage.removeItem('user_data');// Xóa thông tin người dùng khỏi cookies
         Cookies.remove('access_token'); // Xóa access token khỏi cookies (nếu bạn lưu ở đây)
 
         router.push('/auth/login'); // Chuyển hướng đến trang đăng nhập

@@ -122,6 +122,7 @@ export default function AppHeader() {
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                     onClick={handleClick}
+                    title="Submit form"
                 >
                     <SearchOutlined />
                 </button>

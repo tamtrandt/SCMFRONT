@@ -7,6 +7,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { isValidPhoneNumber } from 'libphonenumber-js';
+import { registerUser } from '@/api/auth';
 
 
 
@@ -15,22 +16,12 @@ const Register = () => {
 
     const onFinish = async (values: any) => {
         try {
-            const res = await fetch("http://localhost:5000/auth/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(values),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                message.success("Registration successful! Check your email for verification.");
-                router.push("/auth/verify");
-            } else {
-                message.error(data.message);
-            }
-        } catch (error) {
-            message.error("Registration failed. Please try again.");
+            // Gọi hàm registerUser từ auth.ts
+            await registerUser(values);
+            message.success("Registration successful! Check your email for verification.");
+            router.push("/auth/verify");
+        } catch (error: any) {
+            message.error(error.message || "Registration failed. Please try again.");
         }
     };
 

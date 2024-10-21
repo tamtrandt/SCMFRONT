@@ -137,18 +137,20 @@ export default function HomePage() {
             <Card
               title="Real-time Tracking"
               bordered={false}
+              styles={{
+                header: {
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#002766',
+                  transition: 'color 0.3s ease',
+                },
+              }}
               style={{
                 borderRadius: '10px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                 padding: '30px',
                 fontFamily: 'Arial, sans-serif',
                 transition: 'all 0.3s ease',
-              }}
-              headStyle={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#002766',
-                transition: 'color 0.3s ease',
               }}
               onMouseEnter={(e) => {
                 const titleElement = e.currentTarget.querySelector('.ant-card-head-title') as HTMLElement;
@@ -175,18 +177,20 @@ export default function HomePage() {
             <Card
               title="Seamless QR Code Integration"
               bordered={false}
+              styles={{
+                header: {
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#002766',
+                  transition: 'color 0.3s ease',
+                },
+              }}
               style={{
                 borderRadius: '10px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                 padding: '30px',
                 fontFamily: 'Arial, sans-serif',
                 transition: 'all 0.3s ease',
-              }}
-              headStyle={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#002766',
-                transition: 'color 0.3s ease',
               }}
               onMouseEnter={(e) => {
                 const titleElement = e.currentTarget.querySelector('.ant-card-head-title') as HTMLElement;
@@ -213,18 +217,20 @@ export default function HomePage() {
             <Card
               title="Data Security & Transparency"
               bordered={false}
+              styles={{
+                header: {
+                  fontSize: '24px',
+                  fontWeight: 'bold',
+                  color: '#002766',
+                  transition: 'color 0.3s ease',
+                },
+              }}
               style={{
                 borderRadius: '10px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
                 padding: '30px',
                 fontFamily: 'Arial, sans-serif',
                 transition: 'all 0.3s ease',
-              }}
-              headStyle={{
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#002766',
-                transition: 'color 0.3s ease',
               }}
               onMouseEnter={(e) => {
                 const titleElement = e.currentTarget.querySelector('.ant-card-head-title') as HTMLElement;

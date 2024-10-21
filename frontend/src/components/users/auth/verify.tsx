@@ -1,145 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// "use client";
-
-// import { useState } from "react";
-// import { Form, Input, Button, Row, Col, message, Modal } from "antd";
-// import { useRouter } from "next/navigation";
-
-// const Verify = () => {
-//     const router = useRouter();
-//     const [loading, setLoading] = useState(false);
-//     const [isModalOpen, setIsModalOpen] = useState(false); // Trạng thái mở Modal
-//     const [emailForm] = Form.useForm(); // Form quản lý email nhập vào
-
-//     const onFinish = async (values: any) => {
-//         try {
-//             const res = await fetch("http://localhost:5000/auth/verify", {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 body: JSON.stringify({ code: values.code }),
-//             });
-
-//             const data = await res.json();
-
-//             if (res.ok) {
-//                 message.success("Email verified successfully!");
-//                 router.push("/auth/login");
-//             } else {
-//                 message.error(data.message);
-//             }
-//         } catch (error) {
-//             message.error("Verification failed. Please try again.");
-//         }
-//     };
-
-//     const handleResendCode = async (email: string) => {
-//         try {
-//             setLoading(true);
-//             const res = await fetch("http://localhost:5000/auth/resendcode", {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 body: JSON.stringify({ email }),
-//             });
-
-//             const data = await res.json();
-
-//             if (res.ok) {
-//                 message.success(data.message);
-//                 setIsModalOpen(false); // Đóng modal sau khi gửi thành công
-//             } else {
-//                 message.error(data.message);
-//             }
-//         } catch (error) {
-//             message.error("Failed to resend verification code.");
-//         } finally {
-//             setLoading(false);
-//         }
-//     };
-
-//     const openModal = () => setIsModalOpen(true); // Mở Modal
-//     const closeModal = () => setIsModalOpen(false); // Đóng Modal
-
-//     const onEmailSubmit = async () => {
-//         try {
-//             const values = await emailForm.validateFields(); // Lấy email từ Form
-//             handleResendCode(values.email);
-//         } catch (error) {
-//             message.error("Please enter a valid email.");
-//         }
-//     };
-
-//     return (
-//         <Row justify="center" style={{ marginTop: "50px" }}>
-//             <Col xs={24} md={16} lg={8}>
-//                 <Form name="verify" onFinish={onFinish} layout="vertical">
-//                     <Form.Item
-//                         label="Verification Code"
-//                         name="code"
-//                         rules={[{ required: true, message: "Please enter your code!" }]}
-//                     >
-//                         <Input placeholder="Enter your verification code" />
-//                     </Form.Item>
-//                     <Button type="primary" htmlType="submit" block>
-//                         Verify
-//                     </Button>
-//                 </Form>
-
-//                 <Button
-//                     type="default"
-//                     onClick={openModal}
-//                     block
-//                     style={{ marginTop: 10 }}
-//                 >
-//                     Resend Code
-//                 </Button>
-
-//                 {/* Modal để nhập email */}
-//                 <Modal
-//                     title="Resend Verification Code"
-//                     open={isModalOpen}
-//                     onCancel={closeModal}
-//                     footer={[
-//                         <Button key="cancel" onClick={closeModal}>
-//                             Cancel
-//                         </Button>,
-//                         <Button
-//                             key="submit"
-//                             type="primary"
-//                             loading={loading}
-//                             onClick={onEmailSubmit}
-//                         >
-//                             Resend
-//                         </Button>,
-//                     ]}
-//                 >
-//                     <Form form={emailForm} layout="vertical">
-//                         <Form.Item
-//                             label="Email"
-//                             name="email"
-//                             rules={[
-//                                 { required: true, message: "Please enter your email!" },
-//                                 { type: "email", message: "Please enter a valid email!" },
-//                             ]}
-//                         >
-//                             <Input placeholder="Enter your email" />
-//                         </Form.Item>
-//                     </Form>
-//                 </Modal>
-//             </Col>
-//         </Row>
-//     );
-// };
-
-// export default Verify;
-
-
 "use client";
 
 import { useState } from "react";
-import { Form, Input, Button, Row, Col, message, Modal } from "antd";
+import { Form, Input, Button, Row, Col, message, Modal, Divider } from "antd";
 import { useRouter } from "next/navigation";
+import { resendCode, verifyEmail } from "@/api/auth";
+import Link from "next/link";
 
 const Verify = () => {
     const router = useRouter();
@@ -149,44 +17,23 @@ const Verify = () => {
 
     const onFinish = async (values: any) => {
         try {
-            const res = await fetch("http://localhost:5000/auth/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ code: values.code }),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                message.success("Email verified successfully!");
-                router.push("/auth/login");
-            } else {
-                message.error(data.message);
-            }
-        } catch (error) {
-            message.error("Verification failed. Please try again.");
+            // Gọi hàm verifyEmail từ auth.ts
+            await verifyEmail(values.code);
+            message.success("Email verified successfully!");
+            router.push("/auth/login");
+        } catch (error: any) {
+            message.error(error.message || "Verification failed. Please try again.");
         }
     };
 
     const handleResendCode = async (email: any) => {
         try {
             setLoading(true);
-            const res = await fetch("http://localhost:5000/auth/resendcode", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                message.success(data.message);
-                setIsModalOpen(false);
-            } else {
-                message.error(data.message);
-            }
-        } catch (error) {
-            message.error("Failed to resend verification code.");
+            await resendCode(email); // Gọi hàm resendCode từ auth.ts
+            message.success("Verification code resent successfully!");
+            setIsModalOpen(false);
+        } catch (error: any) {
+            message.error(error.message || "Failed to resend verification code.");
         } finally {
             setLoading(false);
         }
@@ -247,6 +94,11 @@ const Verify = () => {
                     >
                         Resend Code
                     </Button>
+                    <Divider />
+
+                    <div style={{ textAlign: "center" }}>
+                        Ready to <Link href={"/auth/login"}>Login</Link>
+                    </div>
 
                     {/* Modal để nhập email */}
                     <Modal
