@@ -51,17 +51,9 @@ export const loginUser = async (values: AuthValues) => {
         // secure: true,
         // sameSite: "Strict",
         path: "/",
-        expires: 1/24 // Thời gian sống 1 giờ
+        expires: 1/24 
     });
 
-    // Lưu role vào cookies từ đối tượng user
-    // Cookies.set("user_role", data.user.role, {
-    //     path: "/", 
-    // });
-    // Cookies.set("user_data", JSON.stringify(userObject), {
-    //     path: "/",
-    // });
-     // Lưu đối tượng user vào localStorage
      localStorage.setItem("user_data", JSON.stringify(userObject));
 
     
