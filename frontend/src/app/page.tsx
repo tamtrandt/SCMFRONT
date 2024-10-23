@@ -461,7 +461,7 @@ export default function HomePage() {
 
           {/* FootPage */}
           <Paragraph style={{ textAlign: 'center', marginTop: '30px', color: '#d9d9d9', fontSize: '16px' }}>
-            <CopyrightOutlined />2024 ADHART BAYER GmbH. All Rights Reserved.
+            <CopyrightOutlined /> 2024 AdhartBayer. All Rights Reserved.
           </Paragraph>
         </div>
       </Footer>

@@ -1,7 +1,9 @@
+import ProductTable from "@/components/admin/producttable";
+
 const ManageProductPage = () => {
     return (
         <div>
-            ManageProductPage page
+            <ProductTable />
         </div>
     )
 }
