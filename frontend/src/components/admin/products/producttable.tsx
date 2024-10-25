@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import { useState } from 'react';
-import { Button, Modal, Form, Input, InputNumber, Upload, notification } from 'antd';
+import { useEffect, useState } from 'react';
+import { Button, Modal, Form, Input, InputNumber, Upload, notification, Table } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { UploadFile } from 'antd/es/upload/interface';
-import { createProduct } from '@/api/product';
+import { createProduct, getAllProducts } from '@/api/product';
 import ProductList, { Product } from './productlist';
 // Import hàm createProduct
 const ProductTable = () => {
@@ -13,6 +14,72 @@ const ProductTable = () => {
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const [products, setProducts] = useState<Product[]>([]); // State cho danh sách sản phẩm
+
+
+    const columns = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Transaction Hash',
+            dataIndex: 'transactionHash',
+            key: 'transactionHash',
+        },
+        {
+            title: 'QR Codes',
+            dataIndex: 'qrcode',
+            key: 'qrcode',
+            render: (qrcodes: string[]) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {qrcodes.map((code, index) => (
+                        <img
+                            key={index}
+                            src={code}
+                            alt={`QR Code ${index + 1}`}
+                            style={{ width: 100, height: 100 }} // Tăng kích thước QR code
+                        />
+                    ))}
+                </div>
+            ),
+        },
+        {
+            title: 'Created At',
+            dataIndex: 'create_at',
+            key: 'create_at',
+            render: (text: string) => new Date(text).toLocaleString(), // Format thời gian
+        },
+        {
+            title: 'Updated At',
+            dataIndex: 'update_at',
+            key: 'update_at',
+            render: (text: string) => new Date(text).toLocaleString(), // Format thời gian
+        },
+        {
+            title: 'Is Deleted',
+            dataIndex: 'isDeleted',
+            key: 'isDeleted',
+            render: (text: boolean) => (text ? 'Yes' : 'No'), // Hiển thị Yes/No cho isDeleted
+        },
+    ];
+
+    useEffect(() => {
+        // Gọi API khi component được render
+        const fetchProducts = async () => {
+            setLoading(true); // Bật trạng thái loading
+            try {
+                const data = await getAllProducts(); // Gọi API để lấy dữ liệu
+                setProducts(data); // Cập nhật state với dữ liệu trả về
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            } finally {
+                setLoading(false); // Tắt trạng thái loading
+            }
+        };
+
+        fetchProducts(); // Gọi hàm fetchProducts
+    }, []);
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -78,6 +145,9 @@ const ProductTable = () => {
     const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
         setFileList(newFileList.slice(0, 10)); // Giới hạn tối đa 10 files
     };
+    // Định nghĩa các cột cho bảng
+
+
 
     return (
         <>
@@ -89,7 +159,13 @@ const ProductTable = () => {
                 <span>Manager Products</span>
                 <Button onClick={showModal}>New Product</Button>
             </div>
-            <ProductList products={products} /> {/* Truyền products vào ProductList */}
+            {/* Hiển thị bảng với dữ liệu */}
+            <Table
+                columns={columns} // Truyền vào các cột đã định nghĩa
+                dataSource={products} // Truyền vào dữ liệu từ API
+                rowKey="id" // Đặt `id` làm khóa cho mỗi hàng
+                loading={loading} // Hiển thị loading khi dữ liệu đang tải
+            />
 
             <Modal
                 title="Create New Product"

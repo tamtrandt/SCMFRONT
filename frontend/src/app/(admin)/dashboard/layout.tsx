@@ -1,8 +1,9 @@
-import { AdminContextProvider } from "@/components/admin/animation";
+import { AdminContextProvider } from "@/components/admin/dashboard/animation";
 import AdminContent from "@/components/admin/content";
-import AdminFooter from "@/components/admin/footer";
-import AdminHeader from "@/components/admin/header";
-import AdminSideBar from "@/components/admin/sidebar";
+import AdminFooter from "@/components/admin/dashboard/footer";
+import AdminSideBar from "@/components/admin/dashboard/sidebar";
+import AdminHeader from "@/components/admin/dashboard/header";
+
 
 
 const AdminLayout = ({

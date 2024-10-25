@@ -3,20 +3,16 @@
 import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
-
     DashboardOutlined,
-
-
     ProductOutlined,
     SettingOutlined,
     TeamOutlined,
-
 } from '@ant-design/icons';
 import React, { useContext } from 'react';
-
 import type { MenuProps } from 'antd';
 import Link from 'next/link'
 import { AdminContext } from "./animation";
+
 
 type MenuItem = Required<MenuProps>['items'][number];
 const AdminSideBar = () => {

@@ -1,4 +1,4 @@
-import ProductTable from "@/components/admin/producttable";
+import ProductTable from "@/components/admin/products/producttable";
 
 const ManageProductPage = () => {
     return (

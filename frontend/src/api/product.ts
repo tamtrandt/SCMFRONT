@@ -43,4 +43,24 @@ export const createProduct = async (product: CreateProductDto) => {
   }
 };
 
+// Hàm gọi API để lấy tất cả sản phẩm
+export const getAllProducts = async () => {
+  try {
+    // Gọi API lấy danh sách sản phẩm từ endpoint
+    const data = await fetchAPI('/products/dashboard/products', {
+      method: 'GET',
+    });
+
+    return data; // Trả về dữ liệu sau khi thành công
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    throw error; // Ném lỗi ra để frontend có thể xử lý
+  }
+};
+
+
+
+
+
+
 
