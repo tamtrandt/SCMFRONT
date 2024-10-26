@@ -1,6 +1,6 @@
 "use client";
 
-import { MenuFoldOutlined, MenuUnfoldOutlined, PoweroffOutlined, UserOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, PoweroffOutlined, UserOutlined, WalletOutlined } from '@ant-design/icons';
 import { Button, Layout, message } from 'antd';
 import { useContext, useEffect, useState } from 'react';
 import { DownOutlined } from '@ant-design/icons';
@@ -10,6 +10,7 @@ import { Dropdown, Space } from 'antd';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { AdminContext } from './animation';
+import Link from 'next/link';
 
 const AdminHeader = () => {
     const { Header } = Layout;
@@ -44,9 +45,20 @@ const AdminHeader = () => {
         {
             key: '1',
             label: (
+                <Link href="/dashboard/profile"> {/* Đường dẫn đến trang ProfilePage */}
+                    <span>
+                        <UserOutlined style={{ marginRight: 8 }} /> {/* Icon cho Profile */}
+                        Profile
+                    </span>
+                </Link>
+            ),
+        },
+        {
+            key: '2',
+            label: (
                 <span>
-                    <UserOutlined style={{ marginRight: 8 }} /> {/* Icon cho Profile */}
-                    Profile
+                    <WalletOutlined style={{ marginRight: 8 }} /> {/* Icon cho Profile */}
+                    Connect Wallet
                 </span>
             ),
         },

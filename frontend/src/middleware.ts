@@ -7,19 +7,17 @@ export function middleware(request: NextRequest) {
     const accessToken = request.cookies.get('access_token')?.value; // Lấy access token từ cookies
     const pathname = request.nextUrl.pathname; // Đường dẫn hiện tại
 
-    if (pathname === '/') {
+    if (
+        pathname === '/' || 
+        pathname === '/auth/register' || 
+        pathname === '/auth/verify' || 
+        pathname === '/auth/login'
+    ) {
         return NextResponse.next();
     }
 
-    // Nếu đang ở trang đăng nhập và đã có access token, chuyển về đúng trang theo role
-    // if (pathname === '/auth/login' && accessToken) {
-    //     const { role } = decodeToken(accessToken);
-    //     const redirectPath = role === 'admin' ? '/dashboard' : '/home';
-    //     return NextResponse.redirect(new URL(redirectPath, request.url));
-    // }
-
     // Nếu không có access token và không phải trang login, chuyển hướng về trang đăng nhập
-    if (!accessToken && pathname !== '/auth/login') {
+    if (!accessToken) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
