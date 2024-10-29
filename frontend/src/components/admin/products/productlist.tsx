@@ -1,121 +1,80 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import React, { useState } from 'react';
-import { Button, Card, Col, Row, Pagination, message, Input } from 'antd';
-import { DoubleLeftOutlined, DoubleRightOutlined, LeftOutlined, LeftSquareTwoTone, RightOutlined, RightSquareTwoTone, } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Card, Col, Row, } from 'antd';
+import { DeleteOutlined, EditOutlined, SyncOutlined, } from '@ant-design/icons';
+import { getProductById } from '@/api/product';
+import { PaginationComponent } from '@/components/pages/pagination';
+import { QRDisplay } from '@/components/pages/qrcode';
+import { ProductOffChain, ProductOnChain } from '@/components/utils/interfaces';
+import { formatTransactionHash } from '@/components/utils/functions';
 
-export interface Product {
-    id: string;
-    transactionHash: string;
-    qrcode: string[];
-    create_at: Date;
-    update_at: Date;
-    isDeleted: boolean;
-}
+
+
 
 interface ProductListProps {
-    products: Product[];
+    products: ProductOffChain[];
     loading: boolean; // Thêm thuộc tính loading vào đây
 }
 
-const ProductList: React.FC<ProductListProps> = ({ products, loading }) => {
 
-    // Component để hiển thị nhiều mã QR
-    const QRDisplay: React.FC<{ qrcodes: string[] }> = ({ qrcodes }) => {
-        const [currentIndex, setCurrentIndex] = useState(0);
-
-        const nextQR = () => {
-            if (currentIndex < qrcodes.length - 1) {
-                setCurrentIndex(currentIndex + 1);
-            }
-        };
-
-        const prevQR = () => {
-            if (currentIndex > 0) {
-                setCurrentIndex(currentIndex - 1);
-            }
-        };
-
-        return (
-            <div style={{ textAlign: 'center', marginBottom: 10, position: 'relative' }}>
-                <Button
-                    onClick={prevQR}
-                    disabled={currentIndex === 0}
-                    style={{
-                        position: 'absolute',
-                        left: '-25px', // Điều chỉnh khoảng cách sang trái
-                        top: '50%',
-                        transform: 'translateY(-50%)', // Căn giữa theo chiều dọc
-                        height: '60px', // Chiều cao nút
-                        width: '60px', // Chiều rộng nút
-                        border: 'none', // Bỏ viền
-                        backgroundColor: 'transparent', // Nền trong suốt
-                        padding: 0, // Bỏ padding
-                        cursor: 'pointer', // Con trỏ chuột
-                        fontSize: '24px', // Kích thước chữ lớn cho dễ nhìn                      
-                    }}
-                    icon={<DoubleLeftOutlined />} // Sử dụng icon mũi tên trái với màu và độ đậm
-                />
-                <img
-                    src={qrcodes[currentIndex]}
-                    alt="QR Code"
-                    style={{ width: 230, height: 230, marginBottom: 10 }}
-                />
-                <Button
-                    onClick={nextQR}
-                    disabled={currentIndex === qrcodes.length - 1}
-                    style={{
-                        position: 'absolute',
-                        right: '-25px', // Điều chỉnh khoảng cách sang phải
-                        top: '50%',
-                        transform: 'translateY(-50%)', // Căn giữa theo chiều dọc
-                        height: '60px', // Chiều cao nút
-                        width: '60px', // Chiều rộng nút
-                        border: 'none', // Bỏ viền
-                        backgroundColor: 'transparent', // Nền trong suốt
-                        padding: 0, // Bỏ padding
-                        cursor: 'pointer', // Con trỏ chuột
-                        fontSize: '28px', // Kích thước chữ lớn cho dễ nhìn
-                    }}
-                    icon={<DoubleRightOutlined />} // Sử dụng icon mũi tên phải
-                />
-            </div>
-        );
-
-    };
-
-    //Xu Ly HASH
-    const formatTransactionHash = (hash: string) => {
-        if (!hash) return ''; // Kiểm tra nếu hash không tồn tại
-        const start = hash.slice(0, 5); // Lấy 5 ký tự đầu
-        const end = hash.slice(-5); // Lấy 5 ký tự cuối
-        return `${start}...${end}`; // Kết hợp và thêm "..."
-    };
-
-
-    const [currentPage, setCurrentPage] = useState(1);
-    const [inputPage, setInputPage] = useState<string>('');
+export const ProductList = ({ products, loading }: ProductListProps) => {
     const pageSize = 4; // Số sản phẩm trên mỗi trang
+    const [paginatedProducts, setPaginatedProducts] = useState(products.slice(0, pageSize));
+    useEffect(() => {
+        setPaginatedProducts(products.slice(0, pageSize));
+    }, [products]);
 
-    // Tính toán số sản phẩm cần hiển thị trên trang hiện tại
-    const paginatedProducts = products.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-    const totalPages = Math.ceil(products.length / pageSize);
+    const [productData, setProductData] = useState<ProductOnChain | null>(null);
+    const [loadingProduct, setLoadingProduct] = useState(false);
+    const [showProductDetails, setShowProductDetails] = useState<{ [key: string]: boolean }>({});
+    const [productStatus, setProductStatus] = useState<{ [key: string]: boolean }>({}); // Trạng thái cho từng sản phẩm
 
-    const handlePageChange = (page: any) => {
-        setCurrentPage(page);
-    };
+    useEffect(() => {
+        // Khởi tạo trạng thái cho từng sản phẩm
+        const initialStatus: { [key: string]: boolean } = {};
+        products.forEach(product => {
+            initialStatus[product.id] = product.isOnChain; // Giả sử bạn đã có trường isOnChain trong product
+        });
+        setProductStatus(initialStatus);
+    }, [products]);
 
-    const handleGoToPage = () => {
-        const pageNumber = Number(inputPage);
-        if (pageNumber > 0 && pageNumber <= totalPages) {
-            setCurrentPage(pageNumber);
-            setInputPage(''); // Reset ô nhập khi nhảy đến trang
+    const handleFetchProduct = async (id: string) => {
+        if (showProductDetails[id]) {
+            setShowProductDetails((prev) => ({ ...prev, [id]: false }));
+            setProductData(null);
         } else {
-            alert(`Please enter a valid page number between 1 and ${totalPages}`);
+            setLoadingProduct(true);
+            try {
+                const data = await getProductById(id);
+                setProductData(data);
+                setShowProductDetails((prev) => ({ ...prev, [id]: true }));
+                setProductStatus((prev) => ({ ...prev, [id]: true })); // Cập nhật trạng thái thành On-chain khi fetch thành công
+            } catch (error) {
+                console.error("Error fetching product:", error);
+            } finally {
+                setLoadingProduct(false);
+            }
         }
     };
 
+    const handleStatusToggle = (productId: string) => {
+        handleFetchProduct(productId);
+        // Toggle trạng thái của sản phẩm
+        setProductStatus((prev) => ({
+            ...prev,
+            [productId]: !prev[productId] // Đảo trạng thái giữa On-chain và Off-chain
+        }));
+    };
+
+    const handleEdit = (productId: string) => {
+
+    };
+
+    const handleDelete = async (productId: string) => {
+
+    };
 
 
 
@@ -135,96 +94,86 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading }) => {
                                     height: '500px',
                                     width: '300px',
                                     padding: '5px',
-                                    border: '6px solid red',
+                                    border: '3px solid black',
                                     borderRadius: '10px',
                                     margin: '5px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between', // canh nội dung
                                 }}
                             >
-                                <QRDisplay qrcodes={product.qrcode} />
-                                <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    <strong>Product ID:</strong> {formatTransactionHash(product.id)}
-                                </p>
-                                <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    <strong>Transaction Hash:</strong> {formatTransactionHash(product.transactionHash)}
-                                </p>
-                                <p style={{ fontSize: '12px' }}>
-                                    <strong>Created At:</strong> {new Date(product.create_at).toLocaleString()}
-                                </p>
-                                <p style={{ fontSize: '12px' }}>
-                                    <strong>Updated At:</strong> {new Date(product.update_at).toLocaleString()}
-                                </p>
-                                <p style={{ fontSize: '12px' }}>
-                                    <strong>Status:</strong> {product.isDeleted ? 'Deleted' : 'Active'}
-                                </p>
+                                <div>
+                                    {showProductDetails[product.id] && productData && productData.id === product.id ? (
+                                        <>
+                                            <p><strong>Name:</strong> {productData.name}</p>
+                                            <p><strong>Description:</strong> {productData.description}</p>
+                                            <p><strong>Price:</strong> {productData.price}</p>
+                                            <p><strong>Quantity:</strong> {productData.quantity}</p>
+                                            <p><strong>Brand:</strong> {productData.brand}</p>
+                                            <p><strong>Category:</strong> {productData.category}</p>
+                                            <p><strong>Size:</strong> {productData.size}</p>
+                                            <p><strong>Status:</strong> {productData.status}</p>
+                                            <p><strong>Creator:</strong> {productData.creater}</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <QRDisplay qrcodes={product.qrcode} />
+                                            <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <strong>Product ID:</strong> {formatTransactionHash(product.id)}
+                                            </p>
+                                            <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <strong>Transaction Hash:</strong> {formatTransactionHash(product.transactionHash)}
+                                            </p>
+                                            <p style={{ fontSize: '12px' }}>
+                                                <strong>Created At:</strong> {new Date(product.create_at).toLocaleString()}
+                                            </p>
+                                            <p style={{ fontSize: '12px' }}>
+                                                <strong>Updated At:</strong> {new Date(product.update_at).toLocaleString()}
+                                            </p>
+                                            <p style={{ fontSize: '12px' }}>
+                                                <strong>Status:</strong> {product.isDeleted ? 'Deleted' : 'Active'}
+                                            </p>
+                                        </>
+                                    )}
+                                </div>
+                                {/* Phần icon cập nhật, xóa, và button chuyển trạng thái */}
+                                <Row justify="space-between" align="middle" style={{ borderTop: '1px solid #f0f0f0', paddingTop: '10px', marginTop: 'auto' }}>
+                                    <Col>
+                                        <EditOutlined style={{ fontSize: '18px', color: '#1890ff', cursor: 'pointer' }} onClick={() => handleEdit(product.id)} />
+                                        <DeleteOutlined style={{ fontSize: '18px', color: '#ff4d4f', marginLeft: '10px', cursor: 'pointer' }} onClick={() => handleDelete(product.id)} />
+                                    </Col>
+                                    <Col>
+                                        <button
+                                            style={{
+                                                border: 'none',
+                                                backgroundColor: 'transparent',
+                                                color: productStatus[product.id] ? '#52c41a' : '#faad14', // Cập nhật màu dựa trên trạng thái của sản phẩm cụ thể
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                            }}
+                                            onClick={() => handleStatusToggle(product.id)}
+                                        >
+                                            <SyncOutlined /> {productStatus[product.id] ? 'On-chain' : 'Off-chain'}
+                                        </button>
+                                        {loadingProduct && <p>Loading...</p>}
+                                    </Col>
+                                </Row>
                             </Card>
                         </Col>
                     ))
                 )}
             </Row>
-
-
             {/* Hiển thị thông tin phân trang */}
-            <div style={{
-                textAlign: 'center',
-                marginTop: 20,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-            }}>
-                <Button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    style={{ marginRight: '20px' }}
-                >
-
-                    {"<<<"}
-                </Button>
-                <p style={{ margin: '0 20px', fontWeight: 'bold' }}>
-                    {currentPage}/{totalPages}
-                </p>
-                <Button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    style={{ marginLeft: '20px' }}
-                > {">>>"}
-
-                </Button>
-
-                {/* Go to page input */}
-                <div style={{ marginLeft: '20px' }}>
-                    <Input
-                        type="number"
-                        value={inputPage}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            // Kiểm tra nếu value là số nguyên dương hoặc chuỗi rỗng
-                            if (value === '' || /^[1-9]\d*$/.test(value)) {
-                                setInputPage(value);
-                            }
-                        }}
-                        placeholder="Page"
-                        style={{
-                            width: '70px',
-                            marginRight: '8px',
-                            borderRadius: '4px',
-                            border: '1px solid #d9d9d9'
-                        }}
-                    />
-                    <Button
-                        onClick={handleGoToPage}
-                        style={{ borderRadius: '4px', backgroundColor: '#4caf50', color: '#fff' }}
-                    >
-                        Go
-                    </Button>
-                </div>
-            </div>
+            <PaginationComponent
+                products={products}
+                pageSize={pageSize}
+                onPageChange={setPaginatedProducts}
+            />
         </>
     );
-
-
 }
 
-export default ProductList;
+
 
 
 

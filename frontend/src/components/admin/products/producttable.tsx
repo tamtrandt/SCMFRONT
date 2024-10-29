@@ -2,11 +2,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useEffect, useState } from 'react';
-import { Button, Modal, Form, Input, InputNumber, Upload, notification, Table } from 'antd';
+import { Button, Modal, Form, Input, InputNumber, Upload, notification, Table, Row, Col, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { UploadFile } from 'antd/es/upload/interface';
 import { createProduct, getAllProducts } from '@/api/product';
-import ProductList, { Product } from './productlist';
+import { ProductList } from './productlist';
+import { ProductOffChain } from '@/components/utils/interfaces';
+import { MAX_SIZE_BYTES, validateFileUpload } from '@/components/utils/functions';
 
 const ProductTable = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,7 +16,19 @@ const ProductTable = () => {
     const [imageList, setImageList] = useState<UploadFile[]>([]); // New list for images
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const [products, setProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<ProductOffChain[]>([]);
+    const [productType, setProductType] = useState<'Clothing' | 'Shoes' | 'Pants'>('Clothing');
+
+    enum Brand {
+        Adidas = 'Adidas',
+        Puma = 'Puma',
+        Nike = 'Nike',
+    }
+    const sizeOptions = {
+        Clothing: ['S', 'M', 'L', 'XL', 'XXL'],
+        Shoes: ['40', '41', '42', '43', '44'],
+        Pants: ['US 30', 'US 32', 'EU 46', 'EU 48'],
+    };
 
 
     useEffect(() => {
@@ -35,41 +49,56 @@ const ProductTable = () => {
     const showModal = () => {
         setIsModalOpen(true);
     };
+    const handleCancel = () => {
+        setIsModalOpen(false);
+    };
 
     const handleOk = async () => {
         try {
             setLoading(true);
-            const values = await form.validateFields();
 
+            // Validate form fields
+            const values = await form.validateFields();
+            console.log(values);
+
+            // Lấy danh sách files từ fileList và imageList
             const files = [...fileList, ...imageList].map((file) => file.originFileObj as File);
+
+            // Tạo sản phẩm bằng cách gọi hàm createProduct
             const data = await createProduct({
                 name: values.name,
                 description: values.description,
                 price: values.price,
                 quantity: values.quantity,
-                status: "available",
+                brand: values.brand,
+                category: values.category,
+                size: values.size,
                 files,
             });
 
-            const newProduct: Product = {
+            // Tạo đối tượng newProduct từ dữ liệu trả về
+            const newProduct: ProductOffChain = {
                 id: data.id,
                 transactionHash: data.transactionHash,
                 qrcode: data.qrcode,
                 create_at: new Date(data.create_at),
                 update_at: new Date(data.update_at),
+                isOnChain: true,
                 isDeleted: data.isDeleted,
             };
 
+            // Hiển thị thông báo thành công
             notification.success({
                 message: 'Product Created',
                 description: 'The product has been created successfully!',
             });
 
+            // Đóng modal và reset form
             setIsModalOpen(false);
             form.resetFields();
-            setFileList([]);
-            setImageList([]);
-            setProducts(prevProducts => [...prevProducts, newProduct]);
+            setFileList([]); // Reset danh sách file
+            setImageList([]); // Reset danh sách hình ảnh
+            setProducts((prevProducts) => [...prevProducts, newProduct]); // Cập nhật danh sách sản phẩm
         } catch (error) {
             console.error('Error creating product:', error);
             notification.error({
@@ -77,64 +106,26 @@ const ProductTable = () => {
                 description: 'Failed to create product. Please try again.',
             });
         } finally {
-            setLoading(false);
+            setLoading(false); // Đặt loading về false
         }
     };
 
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
 
 
-
-    const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
     const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
-        // Kiểm tra số lượng file
-        if (newFileList.length > 5) {
-            notification.error({
-                message: 'Error',
-                description: `You can only upload up to 5 files include Files and Images.`,
-            });
-            return;
+        const validatedList = validateFileUpload(newFileList, imageList, 5, notification);
+        if (validatedList) {
+            setFileList(validatedList);
         }
-
-        // Kiểm tra tổng kích thước
-        const totalSize = newFileList.reduce((total, file) => total + (file.size || 0), 0);
-        if (totalSize > MAX_SIZE_BYTES) {
-            notification.error({
-                message: 'Error',
-                description: `Total file size include Files and Images must be less than 10 MB.`,
-            });
-            return;
-        }
-
-        setFileList(newFileList.slice(0, 5 - imageList.length));
     };
 
     const handleImageChange = ({ fileList: newImageList }: { fileList: UploadFile[] }) => {
-        // Kiểm tra số lượng file
-        if (newImageList.length > 5) {
-            notification.error({
-                message: 'Error',
-                description: `You can only upload up to 5 files include Files and Images.`,
-            });
-            return;
+        const validatedList = validateFileUpload(newImageList, fileList, 5, notification);
+        if (validatedList) {
+            setImageList(validatedList);
         }
-
-        // Kiểm tra tổng kích thước
-        const totalSize = newImageList.reduce((total, file) => total + (file.size || 0), 0);
-        if (totalSize > MAX_SIZE_BYTES) {
-            notification.error({
-                message: 'Error',
-                description: `Total file size include Files and Images must be less than 10 MB.`,
-            });
-            return;
-        }
-
-        setImageList(newImageList.slice(0, 5 - fileList.length));
     };
-
 
     return (
         <>
@@ -150,7 +141,7 @@ const ProductTable = () => {
 
 
 
-            <ProductList products={products} loading={loading} /> {/* Cung cấp props cần thiết */}
+            <ProductList products={products} loading={loading} />
 
 
             <Modal
@@ -166,10 +157,6 @@ const ProductTable = () => {
                         name="name"
                         rules={[
                             { required: true, message: 'Please input the product name!' },
-                            {
-                                pattern: /^[A-Za-z\s]+$/,
-                                message: 'Only letters and spaces are allowed!',
-                            },
                         ]}
                         style={{ marginBottom: 16 }}
                         labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
@@ -196,40 +183,95 @@ const ProductTable = () => {
                     >
                         <Input.TextArea style={{ borderRadius: 4, padding: '8px 12px' }} rows={3} />
                     </Form.Item>
-                    <Form.Item
-                        label="Price"
-                        name="price"
-                        rules={[
-                            { required: true, message: 'Please input the product price!' },
-                            {
-                                type: 'number',
-                                min: 0,
-                                transform: (value) => Number(value),
-                                message: 'Price must be a positive number!',
-                            },
-                        ]}
-                        style={{ marginBottom: 16 }}
-                        labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
-                    >
-                        <InputNumber min={0} style={{ width: '100%', borderRadius: 4, padding: '8px 12px' }} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Quantity"
-                        name="quantity"
-                        rules={[
-                            { required: true, message: 'Please input the product quantity!' },
-                            {
-                                type: 'number',
-                                min: 0,
-                                transform: (value) => Number(value),
-                                message: 'Quantity must be a positive number!',
-                            },
-                        ]}
-                        style={{ marginBottom: 16 }}
-                        labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
-                    >
-                        <InputNumber min={0} style={{ width: '100%', borderRadius: 4, padding: '8px 12px' }} />
-                    </Form.Item>
+
+
+
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Price"
+                                name="price"
+                                rules={[
+                                    { required: true, message: 'Please input the product price!' },
+                                    {
+                                        validator: (_, value) => {
+                                            // Kiểm tra xem giá trị có phải là số hay không
+                                            if (typeof value !== 'number') {
+                                                return Promise.reject(new Error('Price must be a number'));
+                                            }
+                                            // Kiểm tra nếu giá nhỏ hơn 0
+                                            if (value < 0) {
+                                                return Promise.reject(new Error('Price must be a positive number'));
+                                            }
+                                            // Kiểm tra định dạng để đảm bảo giá có tối đa hai chữ số thập phân
+                                            if (!/^\d+(\.\d{1,2})?$/.test(value.toString())) {
+                                                return Promise.reject(new Error('Price must be a valid number with up to two decimal places'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
+                                <InputNumber min={0} style={{ width: '100%' }} step={0.01} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Quantity"
+                                name="quantity"
+                                rules={[
+                                    { required: true, message: 'Please input the product quantity!' },
+                                    {
+                                        type: 'integer',
+                                        message: 'Quantity must be an integer',
+                                    },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value < 0) {
+                                                return Promise.reject(new Error('Quantity must be a positive integer'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
+                                <InputNumber min={0} style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item label="Brand" name="brand" rules={[{ required: true, message: 'Please select the brand!' }]}>
+                                <Select placeholder="Select Brand">
+                                    {Object.values(Brand).map((brand) => (
+                                        <Select.Option key={brand} value={brand}>{brand}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Category" name="category">
+                                <Select placeholder="Select Type" onChange={(value) => setProductType(value)}>
+                                    {['Clothing', 'Shoes', 'Pants'].map(type => (
+                                        <Select.Option key={type} value={type}>{type}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item label="Size" name="size" rules={[{ required: true, message: 'Please select the size!' }]}>
+                                <Select placeholder="Select Size">
+                                    {sizeOptions[productType].map(size => (
+                                        <Select.Option key={size} value={size}>{size}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
                     <Form.Item
                         label="Upload Images (JPG, PNG, JPEG only)"
                         style={{ marginBottom: 16 }}

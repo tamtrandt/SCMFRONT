@@ -2,18 +2,15 @@
 import { jwtDecode } from "jwt-decode";
 import { fetchAPI } from "./fetch";
 import Cookies from "js-cookie";
+import { Login } from "@/components/utils/interfaces";
 
 
 
 
-interface AuthValues {
-  email: string;
-  password: string;
-  code?: string;
-}
+
 
 // Đăng ký tài khoản
-export const registerUser = async (values: AuthValues) => {
+export const registerUser = async (values: Login) => {
   return await fetchAPI("/auth/register", {
     method: "POST",
     body: values,
@@ -38,7 +35,7 @@ export const resendCode = async (email: string) => {
 
 // Đăng nhập và lưu token vào cookies
 
-export const loginUser = async (values: AuthValues) => {
+export const loginUser = async (values: Login) => {
    
     const data = await fetchAPI("/auth/login", {
         method: "POST",

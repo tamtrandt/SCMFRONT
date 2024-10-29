@@ -6,19 +6,10 @@ import { message } from "antd"; // Import message từ Ant Design để thông b
 import { useRouter } from "next/navigation"; // Sử dụng useRouter từ next/navigation
 import { Modal, Form, Input } from "antd";
 import Cookies from "js-cookie";
+import { ProfileData } from "@/components/utils/interfaces";
 
-interface ProfileData {
-    user_id: string;
-    username: string;
-    email: string;
-    phone: string;
-    address: string;
-    role: string;
-    isactive: boolean;
-    create_at: string;
-}
 
-const Profile: React.FC = () => {
+export const Profile = () => {
     const [profileData, setProfileData] = useState<ProfileData | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -206,4 +197,3 @@ const Profile: React.FC = () => {
     );
 };
 
-export default Profile;

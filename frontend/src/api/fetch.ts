@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export interface FetchOptions {
-  method: "GET" | "POST" | "PUT" | "DELETE";
+  method: "GET" | "POST" | "PUT" | "DELETE" | 'PATCH';
   body?: any;
   headers?: Record<string, string>; // Cho phép tùy chỉnh headers từ options
 }
