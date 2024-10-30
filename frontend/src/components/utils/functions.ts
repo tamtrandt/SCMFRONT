@@ -2,13 +2,6 @@
 import { UploadFile } from "antd";
 
 
-/// Format Hash
-export const formatTransactionHash = (hash: string) => {
-    if (!hash) return ''; // Kiểm tra nếu hash không tồn tại
-    const start = hash.slice(0, 5); // Lấy 5 ký tự đầu
-    const end = hash.slice(-5); // Lấy 5 ký tự cuối
-    return `${start}...${end}`; // Kết hợp và thêm "..."
-};
 
 /// Files Handle
 export const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB

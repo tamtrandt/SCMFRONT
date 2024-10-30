@@ -2,13 +2,14 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Card, Col, Row, } from 'antd';
+import { Button, Card, Col, Row, Spin, } from 'antd';
 import { DeleteOutlined, EditOutlined, SyncOutlined, } from '@ant-design/icons';
 import { getProductById } from '@/api/product';
-import { PaginationComponent } from '@/components/pages/pagination';
-import { QRDisplay } from '@/components/pages/qrcode';
+import { PaginationComponent } from '@/components/componentspage/pagination';
+import { QRDisplay } from '@/components/componentspage/qrcode';
 import { ProductOffChain, ProductOnChain } from '@/components/utils/interfaces';
-import { formatTransactionHash } from '@/components/utils/functions';
+import FormatAndCopyHash from '@/components/componentspage/hash';
+
 
 
 
@@ -21,6 +22,7 @@ interface ProductListProps {
 
 export const ProductList = ({ products, loading }: ProductListProps) => {
     const pageSize = 4; // Số sản phẩm trên mỗi trang
+    const [currentPage, setCurrentPage] = useState(1);
     const [paginatedProducts, setPaginatedProducts] = useState(products.slice(0, pageSize));
     useEffect(() => {
         setPaginatedProducts(products.slice(0, pageSize));
@@ -83,7 +85,7 @@ export const ProductList = ({ products, loading }: ProductListProps) => {
             <Row gutter={24}>
                 {loading ? (
                     <Col style={{ textAlign: 'center', width: '100%' }}>
-                        <p>Loading...</p>
+                        <p><Spin size="large" /></p>
                     </Col>
                 ) : (
                     paginatedProducts.map((product) => (
@@ -91,7 +93,7 @@ export const ProductList = ({ products, loading }: ProductListProps) => {
                             <Card
                                 bordered={false}
                                 style={{
-                                    height: '500px',
+                                    height: '525px',
                                     width: '300px',
                                     padding: '5px',
                                     border: '3px solid black',
@@ -99,30 +101,90 @@ export const ProductList = ({ products, loading }: ProductListProps) => {
                                     margin: '5px',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    justifyContent: 'space-between', // canh nội dung
+                                    justifyContent: 'space-between',
                                 }}
                             >
-                                <div>
+                                {/* Phần button chuyển trạng thái */}
+                                <Row justify="space-between" align="middle" style={{ borderBottom: '1px solid #f0f0f0', paddingBottom: '10px' }}>
+                                    <Col>
+                                        <button
+                                            style={{
+                                                border: 'none',
+                                                backgroundColor: 'transparent',
+                                                color: productStatus[product.id] ? '#52c41a' : '#faad14',
+                                                cursor: 'pointer',
+                                                fontSize: '16px',
+                                            }}
+                                            onClick={() => handleStatusToggle(product.id)}
+                                        >
+                                            <SyncOutlined /> {productStatus[product.id] ? 'On-chain' : 'Off-chain'}
+                                        </button>
+                                        {loadingProduct && <p><Spin size="large" /></p>}
+                                    </Col>
+                                </Row>
+                                <div style={{ flexGrow: 1 }}> {/* Duy trì không gian cho nội dung */}
                                     {showProductDetails[product.id] && productData && productData.id === product.id ? (
                                         <>
-                                            <p><strong>Name:</strong> {productData.name}</p>
-                                            <p><strong>Description:</strong> {productData.description}</p>
-                                            <p><strong>Price:</strong> {productData.price}</p>
-                                            <p><strong>Quantity:</strong> {productData.quantity}</p>
-                                            <p><strong>Brand:</strong> {productData.brand}</p>
-                                            <p><strong>Category:</strong> {productData.category}</p>
-                                            <p><strong>Size:</strong> {productData.size}</p>
-                                            <p><strong>Status:</strong> {productData.status}</p>
-                                            <p><strong>Creator:</strong> {productData.creater}</p>
+                                            <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+                                                <strong>Creator:</strong>
+                                                <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
+                                                    <FormatAndCopyHash hash={productData.creater} />
+                                                </span>
+                                            </p>
+                                            <p style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
+                                                <strong>Name:</strong> {productData.name}
+                                            </p>
+                                            <p style={{ marginBottom: '16px', color: '#666' }}>
+                                                <strong>Description:</strong> {productData.description}
+                                            </p>
+
+                                            <Row gutter={16}>
+                                                <Col span={12}>
+                                                    <p style={{ fontWeight: 'bold' }}><strong>Price:</strong> {productData.price}</p>
+                                                </Col>
+                                                <Col span={12}>
+                                                    <p style={{ fontWeight: 'bold' }}><strong>Quantity:</strong> {productData.quantity}</p>
+                                                </Col>
+                                            </Row>
+
+                                            <Row gutter={16}>
+                                                <Col span={12}>
+                                                    <p style={{ fontWeight: 'bold' }}><strong>Brand:</strong> {productData.brand}</p>
+                                                </Col>
+                                                <Col span={12}>
+                                                    <p style={{ fontWeight: 'bold' }}><strong>Size:</strong> {productData.size}</p>
+                                                </Col>
+                                            </Row>
+
+                                            <Row justify="space-between" style={{ marginTop: '20px' }}>
+                                                <Col>
+                                                    <Button
+                                                        type="primary"
+                                                        onClick={() => handleEdit(product.id)}
+                                                        style={{ marginRight: '8px' }}
+                                                    >
+                                                        <EditOutlined />
+                                                    </Button>
+                                                </Col>
+                                                <Col>
+                                                    <Button
+                                                        type="default"
+                                                        danger
+                                                        onClick={() => handleDelete(product.id)}
+                                                    >
+                                                        <DeleteOutlined />
+                                                    </Button>
+                                                </Col>
+                                            </Row>
                                         </>
                                     ) : (
                                         <>
                                             <QRDisplay qrcodes={product.qrcode} />
-                                            <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                <strong>Product ID:</strong> {formatTransactionHash(product.id)}
+                                            <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-flex', alignItems: 'center' }}>
+                                                <strong>Product ID:</strong> <span style={{ marginLeft: '5px' }}><FormatAndCopyHash hash={product.id} /></span>
                                             </p>
-                                            <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                <strong>Transaction Hash:</strong> {formatTransactionHash(product.transactionHash)}
+                                            <p style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-flex', alignItems: 'center' }}>
+                                                <strong>Transaction Hash:</strong> <span style={{ marginLeft: '5px' }}><FormatAndCopyHash hash={product.transactionHash} /></span>
                                             </p>
                                             <p style={{ fontSize: '12px' }}>
                                                 <strong>Created At:</strong> {new Date(product.create_at).toLocaleString()}
@@ -136,28 +198,8 @@ export const ProductList = ({ products, loading }: ProductListProps) => {
                                         </>
                                     )}
                                 </div>
-                                {/* Phần icon cập nhật, xóa, và button chuyển trạng thái */}
-                                <Row justify="space-between" align="middle" style={{ borderTop: '1px solid #f0f0f0', paddingTop: '10px', marginTop: 'auto' }}>
-                                    <Col>
-                                        <EditOutlined style={{ fontSize: '18px', color: '#1890ff', cursor: 'pointer' }} onClick={() => handleEdit(product.id)} />
-                                        <DeleteOutlined style={{ fontSize: '18px', color: '#ff4d4f', marginLeft: '10px', cursor: 'pointer' }} onClick={() => handleDelete(product.id)} />
-                                    </Col>
-                                    <Col>
-                                        <button
-                                            style={{
-                                                border: 'none',
-                                                backgroundColor: 'transparent',
-                                                color: productStatus[product.id] ? '#52c41a' : '#faad14', // Cập nhật màu dựa trên trạng thái của sản phẩm cụ thể
-                                                cursor: 'pointer',
-                                                fontSize: '16px',
-                                            }}
-                                            onClick={() => handleStatusToggle(product.id)}
-                                        >
-                                            <SyncOutlined /> {productStatus[product.id] ? 'On-chain' : 'Off-chain'}
-                                        </button>
-                                        {loadingProduct && <p>Loading...</p>}
-                                    </Col>
-                                </Row>
+
+
                             </Card>
                         </Col>
                     ))
@@ -171,6 +213,7 @@ export const ProductList = ({ products, loading }: ProductListProps) => {
             />
         </>
     );
+
 }
 
 

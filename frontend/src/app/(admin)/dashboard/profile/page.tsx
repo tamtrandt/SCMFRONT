@@ -1,4 +1,4 @@
-import { Profile } from "@/components/admin/dashboard/profile";
+import { Profile } from "@/components/componentspage/profile";
 
 
 

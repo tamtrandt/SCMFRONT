@@ -54,21 +54,25 @@ export interface ProfileData {
 }
 
 
-export interface CreateUser {
+export interface UpdateUser {
+    user_id: string;
     username: string;      
     email: string;         
-    password: string;     
-    phone?: string;         
-    role?: string;          
+    password: string;      
+    phone: string;         
+    address: string;       
+    role: string;            
 }
 
-export interface UpdateUser {
-    username?: string;      
-    email?: string;         
-    password?: string;      
-    phone?: string;         
-    address?: string;       
-    role?: string;          
-    isActive?: boolean;    
-}
 
+export interface User {
+    user_id: string;
+    username: string;
+    email: string;
+    id: number;
+    phone: string;
+    role: 'admin' | 'customer'; 
+    isActive: boolean;
+    address: string;
+    create_at: string;
+}

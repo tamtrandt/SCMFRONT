@@ -1,12 +1,13 @@
 'use client'
 
-import { getProfile, updateUser, deleteUser } from "@/api/auth"; // Import các hàm cần thiết
 import React, { useEffect, useState } from "react";
 import { message } from "antd"; // Import message từ Ant Design để thông báo
 import { useRouter } from "next/navigation"; // Sử dụng useRouter từ next/navigation
-import { Modal, Form, Input } from "antd";
+import { Modal } from "antd";
 import Cookies from "js-cookie";
 import { ProfileData } from "@/components/utils/interfaces";
+import { getProfile, updateUser, deleteUser } from "@/api/users";
+import UpdateProfileModal from "./updateuser";
 
 
 export const Profile = () => {
@@ -15,7 +16,7 @@ export const Profile = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-    const [form] = Form.useForm();
+
 
     useEffect(() => {
         async function fetchProfile() {
@@ -33,21 +34,8 @@ export const Profile = () => {
         fetchProfile();
     }, []);
 
-    const showModal = () => {
-        form.setFieldsValue({
-            username: profileData?.username,
-            phone: profileData?.phone,
-            address: profileData?.address,
-            email: profileData?.email,
-        });
-        setIsModalOpen(true);
-    };
-
-    const handleUpdate = async () => {
+    const handleUpdate = async (updateUserDto: Partial<ProfileData>) => {
         if (!profileData) return;
-
-        const updateUserDto = form.getFieldsValue();
-        console.log("Data to send:", updateUserDto);
 
         if (!updateUserDto.phone || !/^\+?[1-9]\d{1,14}$/.test(updateUserDto.phone)) {
             message.error("Invalid phone number!");
@@ -132,59 +120,16 @@ export const Profile = () => {
                 <div style={{ display: "flex", justifyContent: "space-between", width: "100%", maxWidth: "600px", marginTop: "1rem" }}>
                     <button
                         style={{ backgroundColor: "#007bff", color: "white", border: "none", borderRadius: "4px", padding: "0.5rem 1rem", cursor: "pointer", transition: "background-color 0.3s", boxShadow: "0 2px 4px rgba(0, 123, 255, 0.3)" }}
-                        onClick={showModal}
+                        onClick={() => setIsModalOpen(true)}
                     >
                         Update Account
                     </button>
-                    <Modal
-                        title="Update Information"
-                        open={isModalOpen}
-                        onOk={handleUpdate}
+                    <UpdateProfileModal
+                        visible={isModalOpen}
                         onCancel={() => setIsModalOpen(false)}
-                        okText="Update"
-                        cancelText="Cancel"
-                    >
-                        <Form form={form} layout="vertical">
-                            <Form.Item
-                                label="Username"
-                                name="username"
-                                rules={[{ required: true, message: 'Please enter your username' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                label="Email"
-                                name="email"
-                                rules={[
-                                    { required: true, message: 'Please enter your email' },
-                                    { type: 'email', message: 'Invalid email format' }
-                                ]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                label="Password"
-                                name="password"
-                                rules={[{ required: true, message: 'Please enter your password' }]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
-                            <Form.Item
-                                label="Phone Number"
-                                name="phone"
-                                rules={[{ required: true, message: 'Please enter your phone number' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                            <Form.Item
-                                label="Address"
-                                name="address"
-                                rules={[{ required: true, message: 'Please enter your address' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-                        </Form>
-                    </Modal>
+                        onUpdate={handleUpdate}
+                        profileData={profileData}
+                    />
                     <button
                         style={{ backgroundColor: "#dc3545", color: "white", border: "none", borderRadius: "4px", padding: "0.5rem 1rem", cursor: "pointer", transition: "background-color 0.3s", boxShadow: "0 2px 4px rgba(220, 53, 69, 0.3)" }}
                         onClick={handleDelete}

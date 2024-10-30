@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { jwtDecode } from "jwt-decode";
 import { fetchAPI } from "./fetch";
 import Cookies from "js-cookie";
 import { Login } from "@/components/utils/interfaces";
@@ -63,52 +62,3 @@ export const loginUser = async (values: Login) => {
 
 
 
-export const getProfile = async () => {
-  const token = Cookies.get("access_token");
-  if (!token) {
-    throw new Error("Token không tồn tại");
-  }
-
-  // Giải mã token để lấy thông tin người dùng
-  const decodedToken = jwtDecode<{ sub: string }>(token); // Giả định rằng 'sub' là id người dùng
-  const userId = decodedToken.sub;
-
-  // Gọi API với userId
-  return await fetchAPI(`/users/${userId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
-
-// Cập nhật thông tin người dùng
-export const updateUser = async (id: string, updateUserDto: any) => {
-  const token = Cookies.get("access_token");
-  if (!token) {
-    throw new Error("Token không tồn tại");
-  }
-
-  return await fetchAPI(`/users/${id}`, {
-    method: "PUT",
-    body: updateUserDto,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};
-
-// Xóa tài khoản người dùng
-export const deleteUser = async (id: string) => {
-  const token = Cookies.get("access_token");
-  if (!token) {
-    throw new Error("Token không tồn tại");
-  }
-
-  return await fetchAPI(`/users/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-};

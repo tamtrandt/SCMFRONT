@@ -4,7 +4,9 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
     DashboardOutlined,
+    FolderOpenOutlined,
     ProductOutlined,
+    RocketOutlined,
     TeamOutlined,
 } from '@ant-design/icons';
 import React, { useContext } from 'react';
@@ -19,7 +21,6 @@ const AdminSideBar = () => {
     const { collapseMenu } = useContext(AdminContext)!;
 
     const items: MenuItem[] = [
-
         {
             key: 'grp',
             label: 'SCM',
@@ -37,14 +38,24 @@ const AdminSideBar = () => {
                 },
                 {
                     key: "products",
-                    label: <Link href={"/dashboard/products"}>Manage Products</Link>,
+                    label: 'Manage Products',
                     icon: <ProductOutlined />,
+                    children: [ // Thêm children cho nhóm products
+                        {
+                            key: "storage",
+                            label: <Link href={"/dashboard/products"}>Storage</Link>,
+                            icon: <FolderOpenOutlined />, // Bạn có thể thay đổi icon tùy theo ý muốn
+                        },
+                        {
+                            key: "releasing",
+                            label: <Link href={""}>Releasing</Link>,
+                            icon: <RocketOutlined />, // Bạn có thể thay đổi icon tùy theo ý muốn
+                        },
+                    ],
                 },
-
             ],
         },
     ];
-
     return (
         <Sider
             collapsed={collapseMenu}

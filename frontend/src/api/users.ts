@@ -1,23 +1,27 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { fetchAPI } from "./fetch";
-import { CreateUser, UpdateUser } from "@/components/utils/interfaces";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
 
-// Hàm gọi API để tạo người dùng
-export const createUser = async (user: CreateUser) => {
+
+
+export const createUser = async (userData: any) => {
   try {
-    const data = await fetchAPI('/users', {
-      method: 'POST',
-      body: JSON.stringify(user),
-      headers: {
-        'Content-Type': 'application/json', // Đặt kiểu nội dung là JSON
-      },
-    });
-
-    return data; // Trả về dữ liệu sau khi thành công
+      const response = await fetchAPI('/users/create', {
+          method: 'POST',
+          body: userData,
+      });
+      return response; // Trả về dữ liệu phản hồi từ server
   } catch (error) {
-    console.error('Error creating user:', error);
-    throw error; // Ném lỗi ra để frontend có thể xử lý
+      // Ném lại lỗi với thông điệp từ server
+      if (error instanceof Error) {
+          throw new Error(error.message); // Ném thông điệp lỗi
+      }
+      throw new Error('Failed to create user'); // Thông báo lỗi mặc định
   }
 };
+
 
 // Hàm gọi API để lấy tất cả người dùng
 export const getAllUsers = async () => {
@@ -33,34 +37,53 @@ export const getAllUsers = async () => {
   }
 };
 
-// Hàm gọi API để cập nhật thông tin người dùng
-export const updateUser = async (id: string, updateUserDto: Partial<UpdateUser>) => {
-  try {
-    const data = await fetchAPI(`/users/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(updateUserDto),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
 
-    return data; // Trả về dữ liệu sau khi thành công
-  } catch (error) {
-    console.error('Error updating user:', error);
-    throw error; // Ném lỗi ra để frontend có thể xử lý
+export const getProfile = async () => {
+  const token = Cookies.get("access_token");
+  if (!token) {
+    throw new Error("Token không tồn tại");
   }
+
+  // Giải mã token để lấy thông tin người dùng
+  const decodedToken = jwtDecode<{ sub: string }>(token); // Giả định rằng 'sub' là id người dùng
+  const userId = decodedToken.sub;
+
+  // Gọi API với userId
+  return await fetchAPI(`/users/${userId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
-// Hàm gọi API để xóa người dùng
-export const deleteUser = async (id: string) => {
-  try {
-    const result = await fetchAPI(`/users/${id}`, {
-      method: 'DELETE',
-    });
-
-    return result; // Trả về dữ liệu sau khi thành công
-  } catch (error) {
-    console.error('Error deleting user:', error);
-    throw error; // Ném lỗi ra để frontend có thể xử lý
+// Cập nhật thông tin người dùng
+export const updateUser = async (id: string, updateUserDto: any) => {
+  const token = Cookies.get("access_token");
+  if (!token) {
+    throw new Error("Token không tồn tại");
   }
+
+  return await fetchAPI(`/users/${id}`, {
+    method: "PUT",
+    body: updateUserDto,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
+// Xóa tài khoản người dùng
+export const deleteUser = async (id: string) => {
+  const token = Cookies.get("access_token");
+  if (!token) {
+    throw new Error("Token không tồn tại");
+  }
+
+  return await fetchAPI(`/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
