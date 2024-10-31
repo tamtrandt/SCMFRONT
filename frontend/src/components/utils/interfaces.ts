@@ -17,17 +17,18 @@ export interface CreateProduct {
 }
 
 
-export interface ProductOffChain {
+export interface GetProductOffChain {
     id: string;
     transactionHash: string;
-    qrcode: string[];
+    isDeleted: boolean;
+    store: string;
     create_at: Date;
     update_at: Date;
-    isDeleted: boolean;
-    isOnChain: boolean;
+    qrcode: string[];
+   
 }
 
-export interface ProductOnChain {
+export interface GetProductOnChain {
     id: string;
     name: string;
     description: string;
@@ -37,6 +38,7 @@ export interface ProductOnChain {
     category: string;
     size: string;
     status: string;
+    store: string;
     cids: string[];
     creater: string;
 
@@ -76,3 +78,15 @@ export interface User {
     address: string;
     create_at: string;
 }
+
+
+export enum Brand {
+    Adidas = 'Adidas',
+    Puma = 'Puma',
+    Nike = 'Nike',
+}
+export const sizeOptions = {
+    Clothing: ['S', 'M', 'L', 'XL', 'XXL'],
+    Shoes: ['40', '41', '42', '43', '44'],
+    Pants: ['US 30', 'US 32', 'EU 46', 'EU 48'],
+};

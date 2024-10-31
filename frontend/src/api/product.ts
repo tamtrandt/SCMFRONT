@@ -40,10 +40,10 @@ export const createProduct = async (product: CreateProduct) => {
 };
 
 // Hàm gọi API để lấy tất cả sản phẩm
-export const getAllProducts = async () => {
+export const getAllProductOffChain = async () => {
   try {
     // Gọi API lấy danh sách sản phẩm từ endpoint
-    const data = await fetchAPI('/products/dashboard/products', {
+    const data = await fetchAPI('/products/offchainall/all', {
       method: 'GET',
     });
 
@@ -53,11 +53,10 @@ export const getAllProducts = async () => {
     throw error; // Ném lỗi ra để frontend có thể xử lý
   }
 };
-
-// Hàm gọi API để lấy sản phẩm theo ID
-export const getProductById = async (id: string) => {
+// Hàm gọi API để lấy sản phẩm theo ID OFF CHAIN
+export const getProductOffChain = async (id: string) => {
   try {
-    const data = await fetchAPI(`/products/home/products/${id}`, {
+    const data = await fetchAPI(`/products/offchain/${id}`, {
       method: 'GET',
     });
 
@@ -67,6 +66,37 @@ export const getProductById = async (id: string) => {
     throw error; 
   }
 };
+
+
+// Hàm gọi API để lấy sản phẩm theo ID ON CHAIN
+export const getProductOnChain = async (id: string) => {
+  try {
+    const data = await fetchAPI(`/products/onchain/${id}`, {
+      method: 'GET',
+    });
+
+    return data; 
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    throw error; 
+  }
+};
+
+// Hàm gọi API để lấy all sản phẩm 
+export const getAllProductOnChain = async () => {
+  try {
+    const data = await fetchAPI(`/products/onchainall/all`, {
+      method: 'GET',
+    });
+
+    return data; 
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    throw error; 
+  }
+};
+
+
 
 
 

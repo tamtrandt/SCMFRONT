@@ -86,3 +86,5 @@ export const PaginationComponent = ({ products, pageSize, onPageChange }: Pagina
         </div>
     );
 };
+
+
