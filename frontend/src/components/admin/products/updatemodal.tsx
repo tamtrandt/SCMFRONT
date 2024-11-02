@@ -1,27 +1,43 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// ProductForm.tsx
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Modal, Form, Input, InputNumber, Upload, notification, Row, Col, Select } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { UploadFile } from 'antd/es/upload/interface';
-import { createProduct } from '@/api/product';
-import { Brand, GetProductOffChain, sizeOptions } from '@/components/utils/interfaces';
+import { updateProduct } from '@/api/product';
+import { Brand, GetProductOffChain, GetProductOnChain, sizeOptions } from '@/components/utils/interfaces';
 import { MAX_SIZE_BYTES, validateFileUpload } from '@/components/utils/functions';
 
-interface ProductFormProps {
+interface UpdateProductModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onProductCreated: (product: GetProductOffChain) => void;
-
+    productData: GetProductOnChain; // Dữ liệu sản phẩm hiện tại
+    onProductUpdated: (product: GetProductOffChain) => void; // Callback để thông báo khi sản phẩm đã được cập nhật
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCreated }) => {
+const UpdateProductModal: React.FC<UpdateProductModalProps> = ({ isOpen, onClose, productData, onProductUpdated }) => {
     const [fileList, setFileList] = useState<UploadFile[]>([]);
     const [imageList, setImageList] = useState<UploadFile[]>([]);
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
     const [productType, setProductType] = useState<'Clothing' | 'Shoes' | 'Pants'>('Clothing');
+
+    useEffect(() => {
+        if (isOpen && productData) {
+            // Điền dữ liệu vào form khi modal mở
+            form.setFieldsValue({
+                name: productData.name,
+                description: productData.description,
+                price: productData.price,
+                quantity: productData.quantity,
+                brand: productData.brand,
+                category: productData.category,
+                size: productData.size,
+            });
+            // Reset fileList và imageList nếu cần thiết
+            setFileList([]);
+            setImageList([]);
+        }
+    }, [isOpen, productData, form]);
 
     const handleOk = async () => {
         try {
@@ -29,7 +45,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
             const values = await form.validateFields();
             const files = [...fileList, ...imageList].map((file) => file.originFileObj as File);
 
-            const data = await createProduct({
+            const data = await updateProduct(productData.id, {
                 name: values.name,
                 description: values.description,
                 price: values.price,
@@ -40,7 +56,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                 files,
             });
 
-            const newProduct: GetProductOffChain = {
+            const updatedProduct: GetProductOffChain = {
                 id: data.id,
                 transactionHash: data.transactionHash,
                 isDeleted: data.isDeleted,
@@ -49,10 +65,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                 qrcode: data.qrcode,
             };
 
-            onProductCreated(newProduct);
+            onProductUpdated(updatedProduct);
             notification.success({
-                message: 'Product Created',
-                description: 'The product has been created successfully!',
+                message: 'Product Updated',
+                description: 'The product has been updated successfully!',
             });
 
             onClose();
@@ -60,10 +76,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
             setFileList([]);
             setImageList([]);
         } catch (error) {
-            console.error('Error creating product:', error);
+            console.error('Error updating product:', error);
             notification.error({
                 message: 'Error',
-                description: 'Failed to create product. Please try again.',
+                description: 'Failed to update product. Please try again.',
             });
         } finally {
             setLoading(false);
@@ -86,7 +102,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
 
     return (
         <Modal
-            title="Create New Product"
+            title="Update Product"
             open={isOpen}
             onOk={handleOk}
             onCancel={onClose}
@@ -96,11 +112,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                 <Form.Item
                     label="Name"
                     name="name"
-                    rules={[
-                        { required: true, message: 'Please input the product name!' },
-                    ]}
+                    rules={[{ required: true, message: 'Please input the product name!' }]}
                     style={{ marginBottom: 16 }}
-                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
+                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }}
                 >
                     <Input style={{ borderRadius: 4, padding: '8px 12px' }} />
                 </Form.Item>
@@ -120,12 +134,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                         }
                     ]}
                     style={{ marginBottom: 16 }}
-                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
+                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }}
                 >
                     <Input.TextArea style={{ borderRadius: 4, padding: '8px 12px' }} rows={3} />
                 </Form.Item>
-
-
 
                 <Row gutter={24}>
                     <Col span={12}>
@@ -136,15 +148,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                                 { required: true, message: 'Please input the product price!' },
                                 {
                                     validator: (_, value) => {
-                                        // Kiểm tra xem giá trị có phải là số hay không
                                         if (typeof value !== 'number') {
                                             return Promise.reject(new Error('Price must be a number'));
                                         }
-                                        // Kiểm tra nếu giá nhỏ hơn 0
                                         if (value < 0) {
                                             return Promise.reject(new Error('Price must be a positive number'));
                                         }
-                                        // Kiểm tra định dạng để đảm bảo giá có tối đa hai chữ số thập phân
                                         if (!/^\d+(\.\d{1,2})?$/.test(value.toString())) {
                                             return Promise.reject(new Error('Price must be a valid number with up to two decimal places'));
                                         }
@@ -293,4 +302,4 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
     );
 };
 
-export default ProductForm;
+export default UpdateProductModal;

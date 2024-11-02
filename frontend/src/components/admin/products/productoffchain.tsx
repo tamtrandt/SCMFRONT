@@ -45,39 +45,36 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id }) 
             <QRDisplay qrcodes={product.qrcode} /> {/* Hiển thị QR code */}
 
             <Row gutter={16} style={{ marginTop: '20px' }}>
-                <Col span={12}>
-                    <div style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-flex', alignItems: 'center' }}>
-                        <strong>Product ID:</strong>
-                        <span style={{ marginLeft: '5px' }}>
+                <Col span={24}>
+                    <div style={{ fontSize: '14px', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                        <strong style={{ flexShrink: 0 }}>Product ID:</strong>
+                        <span style={{ marginLeft: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             <FormatAndCopyHash hash={product.id} />
                         </span>
                     </div>
-
-                    <div style={{ fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-flex', alignItems: 'center' }}>
-                        <strong>Transaction Hash:</strong>
-                        <span style={{ marginLeft: '5px' }}>
+                    <div style={{ fontSize: '14px', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+                        <strong style={{ flexShrink: 0 }}>Transaction Hash:</strong>
+                        <span style={{ marginLeft: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             <FormatAndCopyHash hash={product.transactionHash} />
                         </span>
                     </div>
                 </Col>
             </Row>
 
-            <Row gutter={16} style={{ marginTop: '10px' }}>
+            <Row gutter={16}>
                 <Col span={12}>
-                    <p style={{ fontSize: '12px' }}>
+                    <p style={{ fontSize: '14px', marginBottom: '8px' }}>
                         <strong>Created At:</strong> {new Date(product.create_at).toLocaleString()}
                     </p>
                 </Col>
                 <Col span={12}>
-                    <p style={{ fontSize: '12px' }}>
+                    <p style={{ fontSize: '14px', marginBottom: '8px' }}>
                         <strong>Updated At:</strong> {new Date(product.update_at).toLocaleString()}
                     </p>
                 </Col>
-            </Row>
 
-            <Row gutter={16} style={{ marginTop: '10px' }}>
                 <Col span={24}>
-                    <p style={{ fontSize: '12px' }}>
+                    <p style={{ fontSize: '14px', marginTop: '10px' }}>
                         <strong>Status:</strong> {product.isDeleted ? 'Deleted' : 'Active'}
                     </p>
                 </Col>

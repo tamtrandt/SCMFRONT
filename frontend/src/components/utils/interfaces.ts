@@ -13,7 +13,7 @@ export interface CreateProduct {
     brand: string; 
     category: string;    
     size: string;         
-    files: File[];     
+    files: File[]; 
 }
 
 
@@ -21,7 +21,6 @@ export interface GetProductOffChain {
     id: string;
     transactionHash: string;
     isDeleted: boolean;
-    store: string;
     create_at: Date;
     update_at: Date;
     qrcode: string[];

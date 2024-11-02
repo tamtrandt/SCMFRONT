@@ -3,8 +3,8 @@
 'use client'
 import { getProductOnChain } from '@/api/product';
 import FormatAndCopyHash from '@/components/componentspage/hash';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Row, Spin } from 'antd';
+import { ImageDisplay } from '@/components/componentspage/image';
+import { Col, Row, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
 
 
@@ -29,7 +29,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
 
             try {
                 const data = await getProductOnChain(id); // Gọi API để lấy dữ liệu sản phẩm
-                console.log(data); // Kiểm tra dữ liệu nhận được
+
 
                 // Thiết lập trạng thái cho sản phẩm từ dữ liệu trả về
                 setProduct({
@@ -42,7 +42,8 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
                     category: data.category,
                     size: data.size,
                     status: data.status,
-                    cids: data.cids, // Sử dụng cids trực tiếp từ dữ liệu
+                    imagecids: data.imagecids,
+                    filecids: data.filecids, // Sử dụng cids trực tiếp từ dữ liệu
                     creater: data.creater,
                 });
             } catch (error) {
@@ -64,20 +65,25 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
         return <div>{error}</div>; // Hiển thị thông báo lỗi
     }
 
+
+
+
+
     return (
         <>
-            <p style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+            <ImageDisplay imagecids={product.imagecids} />
+            <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
                 <strong>Creator:</strong>
                 <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
                     <FormatAndCopyHash hash={product.creater} />
                 </span>
-            </p>
-            <p style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
+            </div>
+            <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
                 <strong>Name:</strong> {product.name}
-            </p>
-            <p style={{ marginBottom: '16px', color: '#666' }}>
+            </div>
+            <div style={{ marginBottom: '16px', color: '#666' }}>
                 <strong>Description:</strong> {product.description}
-            </p>
+            </div>
 
             <Row gutter={16}>
                 <Col span={12}>
@@ -97,26 +103,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
                 </Col>
             </Row>
 
-            <Row justify="space-between" style={{ marginTop: '20px' }}>
-                <Col>
-                    <Button
-                        type="primary"
 
-                        style={{ marginRight: '8px' }}
-                    >
-                        <EditOutlined />
-                    </Button>
-                </Col>
-                <Col>
-                    <Button
-                        type="default"
-                        danger
-
-                    >
-                        <DeleteOutlined />
-                    </Button>
-                </Col>
-            </Row>
         </>
     );
 };

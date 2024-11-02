@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // src/services/product.ts
 
@@ -95,6 +96,47 @@ export const getAllProductOnChain = async () => {
     throw error; 
   }
 };
+
+
+export const deleteProduct = async (id: string) => {
+     return await fetchAPI(`/products/delete/${id}`, { 
+      method: 'DELETE',
+    });
+};
+
+
+
+
+
+export const updateProduct = async (id: string , productData: any) => {
+      return await fetchAPI(`/products/update/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: productData,
+      });
+    };
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

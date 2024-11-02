@@ -3,34 +3,35 @@ import { Button } from 'antd';
 import { DoubleLeftOutlined, DoubleRightOutlined } from '@ant-design/icons';
 import NoImage from '@/public/images/NoImage.png';
 
-interface QRDisplayProps {
-    qrcodes: string[];
+
+interface ImageDisplayProps {
+    imagecids: string[];
 }
 
-export const QRDisplay = ({ qrcodes }: QRDisplayProps) => {
+export const ImageDisplay = ({ imagecids }: ImageDisplayProps) => {
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const nextQR = () => {
-        if (currentIndex < qrcodes.length - 1) {
+    const nextImage = () => {
+        if (currentIndex < imagecids.length - 1) {
             setCurrentIndex(currentIndex + 1);
         }
     };
 
-    const prevQR = () => {
+    const prevImage = () => {
         if (currentIndex > 0) {
             setCurrentIndex(currentIndex - 1);
         }
     };
-    // Kiểm tra nếu không có mã QR thì sử dụng ảnh mặc định
-    const hasQRCodes = qrcodes && qrcodes.length > 0;
-    const currentQRCodeUrl = hasQRCodes
-        ? qrcodes[currentIndex]
-        : (typeof NoImage === 'string' ? NoImage : NoImage.src);
+
+    const hasImages = imagecids && imagecids.length > 0;
+    const currentImageUrl = hasImages
+        ? imagecids[currentIndex].replace('ipfs://', 'https://ipfs.io/ipfs/')
+        : (typeof NoImage === 'string' ? NoImage : NoImage.src);; // Đường dẫn ảnh mặc định nếu không có imageCIDs
 
     return (
         <div style={{ textAlign: 'center', marginBottom: 10, position: 'relative' }}>
             <Button
-                onClick={prevQR}
+                onClick={prevImage}
                 disabled={currentIndex === 0}
                 style={{
                     position: 'absolute',
@@ -47,14 +48,16 @@ export const QRDisplay = ({ qrcodes }: QRDisplayProps) => {
                 }}
                 icon={<DoubleLeftOutlined />}
             />
+            {/* Sử dụng điều kiện để hiển thị ảnh */}
             <img
-                src={currentQRCodeUrl}
-                alt={hasQRCodes ? `QR Code ${currentIndex + 1}` : 'Default Image'}
-                style={{ width: 230, height: 230, marginBottom: 10 }}
+                src={currentImageUrl} // Hiển thị ảnh từ CID hoặc ảnh mặc định
+                alt={hasImages ? `Image ${currentIndex + 1}` : 'Default Image'}
+                style={{ width: 200, height: 200, marginBottom: 10 }}
             />
+
             <Button
-                onClick={nextQR}
-                disabled={currentIndex === qrcodes.length - 1}
+                onClick={nextImage}
+                disabled={currentIndex === imagecids.length - 1}
                 style={{
                     position: 'absolute',
                     right: '-25px',

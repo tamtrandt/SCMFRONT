@@ -6,11 +6,13 @@ import { Button } from 'antd';
 import { GetProductOffChain, } from '@/components/utils/interfaces';
 import { ProductList } from './product';
 import ProductForm from './productmodal';
-import { getAllProductOffChain } from '@/api/product';
+import { getAllProductOffChain, getAllProductOnChain } from '@/api/product';
 
 const ProductTable = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [products, setProducts] = useState<GetProductOffChain[]>([]);
+
+
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -22,14 +24,24 @@ const ProductTable = () => {
         setProducts((prevProducts) => [newProduct, ...prevProducts]); // Thêm sản phẩm vào cuối mảng
     };
 
+    const handleProductDeleted = (productId: string) => {
+        setProducts((prevProducts) => prevProducts.filter(product => product.id !== productId)); // Cập nhật danh sách sau khi xóa
+    };
+
+
+
     // Tải dữ liệu sản phẩm ban đầu khi component lần đầu render
     useEffect(() => {
         const fetchInitialProducts = async () => {
-            try {
-                const data = await getAllProductOffChain();
+            const data = await getAllProductOffChain(); // Gọi hàm để lấy dữ liệu off-chain
+
+            // Kiểm tra xem có dữ liệu không
+            if (data && data.product_ids && data.product_ids.length > 0) {
                 setProducts(data.product_ids.map((id: string) => ({ id }))); // Chuyển đổi dữ liệu từ backend
-            } catch (error) {
-                console.error('Error fetching initial products:', error);
+            } else {
+                // Nếu không có dữ liệu, gọi hàm để lấy dữ liệu on-chain
+                const onChainData = await getAllProductOnChain();
+                setProducts(onChainData.product_ids.map((id: string) => ({ id }))); // Chuyển đổi dữ liệu từ blockchain
             }
         };
 
@@ -48,9 +60,12 @@ const ProductTable = () => {
                 <Button onClick={showModal}>New Product</Button>
             </div>
 
-            {/* Truyền products dưới dạng prop */}
-            <ProductList products={products} />
+            {/* Truyền products và hàm xóa xuống ProductList */}
+            <ProductList
+                products={products}
+                onProductDeleted={handleProductDeleted}
 
+            />
             <ProductForm
                 isOpen={isModalOpen}
                 onClose={handleCancel}
