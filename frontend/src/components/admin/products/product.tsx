@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import { deleteProduct, getAllProductOffChain, updateProduct } from '@/api/product';
+import { deleteProduct } from '@/api/product';
 import React, { useEffect, useState } from 'react';
 import { ProductOnChainCard } from './productonchain';
 import { ProductOffChainCard } from './productoffchain';
-import { Button, Card, Checkbox, Col, Modal, notification, Row } from 'antd';
+import { Button, Card, Col, Modal, notification, Row } from 'antd';
 import { PaginationComponent } from '@/components/componentspage/pagination';
 import { DeleteOutlined, EditOutlined, SyncOutlined } from '@ant-design/icons';
-import { GetProductOffChain, GetProductOnChain } from '@/components/utils/interfaces';
-import ProductForm from './productmodal';
-import UpdateProductModal from './updatemodal';
+import { GetProductOffChain } from '@/components/utils/interfaces';
+import { UpdateModal } from './updatemodal';
+
 
 interface ProductListProps {
     products: GetProductOffChain[];
@@ -21,13 +21,9 @@ interface ProductListProps {
 export const ProductList = ({ products, onProductDeleted }: ProductListProps) => {
     const [viewOnChain, setViewOnChain] = useState<Record<string, boolean>>({});
     const [paginatedProducts, setPaginatedProducts] = useState<GetProductOffChain[]>([]);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [editingProduct, setEditingProduct] = useState<GetProductOffChain | null>(null);
-
-
-
-
     const pageSize = 4;
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
 
     useEffect(() => {
         // Cập nhật `paginatedProducts` mỗi khi `products` thay đổi
@@ -76,21 +72,12 @@ export const ProductList = ({ products, onProductDeleted }: ProductListProps) =>
         });
     };
 
-    const handleEdit = (product: GetProductOffChain) => {
-        setEditingProduct(product);
+    const handleEdit = (productId: string) => {
+        setSelectedProductId(productId);
         setIsEditModalVisible(true);
     };
 
-    const handleEditModalOk = () => {
-        // Xử lý cập nhật thông tin sản phẩm tại đây
-        setIsEditModalVisible(false);
-        setEditingProduct(null); // Reset sản phẩm đang chỉnh sửa
-    };
 
-    const handleEditModalCancel = () => {
-        setIsEditModalVisible(false);
-        setEditingProduct(null);
-    };
 
 
 
@@ -128,7 +115,7 @@ export const ProductList = ({ products, onProductDeleted }: ProductListProps) =>
 
                                 {/* Container cho các nút Edit và Delete bên phải */}
 
-                                <Button type="primary" onClick={() => handleEdit(product)}>
+                                <Button type="primary" onClick={() => handleEdit(product.id)}>
                                     <EditOutlined />
                                 </Button>
                                 <Button type="default" danger onClick={() => handleDelete(product.id)}>
@@ -180,20 +167,222 @@ export const ProductList = ({ products, onProductDeleted }: ProductListProps) =>
 
 
             {/* Modal Edit Product */}
-            <Modal
-                title="Chỉnh sửa sản phẩm"
+            {/* <Modal
+                title="Update Product"
                 open={isEditModalVisible}
                 onOk={handleEditModalOk}
                 onCancel={handleEditModalCancel}
+                confirmLoading={loading}
             >
-                {editingProduct && (
-                    <div>
-                        {/* Render form cho sản phẩm chỉnh sửa tại đây */}
-                        <p>ID: {editingProduct.id}</p>
-                        {/* Thêm các trường khác ở đây */}
-                    </div>
-                )}
-            </Modal>
+                <Form form={form} layout="vertical">
+                    <Form.Item
+                        label="Name"
+                        name="name"
+                        rules={[
+                            { required: true, message: 'Please input the product name!' },
+                        ]}
+                        style={{ marginBottom: 16 }}
+                        labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
+                    >
+                        <Input />
+                    </Form.Item>
+                    <Form.Item
+                        label="Description"
+                        name="description"
+                        rules={[
+                            { required: true, message: 'Please input the product description!' },
+                            {
+                                validator: (_, value) => {
+                                    const wordCount = value ? value.trim().split(/\s+/).length : 0;
+                                    if (wordCount > 250) {
+                                        return Promise.reject(new Error('Description cannot exceed 250 words!'));
+                                    }
+                                    return Promise.resolve();
+                                }
+                            }
+                        ]}
+                        style={{ marginBottom: 16 }}
+                        labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
+                    >
+                        <Input.TextArea rows={3} />
+                    </Form.Item>
+
+
+
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Price"
+                                name="price"
+                                rules={[
+                                    { required: true, message: 'Please input the product price!' },
+                                    {
+                                        validator: (_, value) => {
+                                            // Kiểm tra xem giá trị có phải là số hay không
+                                            if (typeof value !== 'number') {
+                                                return Promise.reject(new Error('Price must be a number'));
+                                            }
+                                            // Kiểm tra nếu giá nhỏ hơn 0
+                                            if (value < 0) {
+                                                return Promise.reject(new Error('Price must be a positive number'));
+                                            }
+                                            // Kiểm tra định dạng để đảm bảo giá có tối đa hai chữ số thập phân
+                                            if (!/^\d+(\.\d{1,2})?$/.test(value.toString())) {
+                                                return Promise.reject(new Error('Price must be a valid number with up to two decimal places'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
+                                <InputNumber min={0} style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                                label="Quantity"
+                                name="quantity"
+                                rules={[
+                                    { required: true, message: 'Please input the product quantity!' },
+                                    {
+                                        type: 'integer',
+                                        message: 'Quantity must be an integer',
+                                    },
+                                    {
+                                        validator: (_, value) => {
+                                            if (value < 0) {
+                                                return Promise.reject(new Error('Quantity must be a positive integer'));
+                                            }
+                                            return Promise.resolve();
+                                        }
+                                    }
+                                ]}
+                            >
+                                <InputNumber min={0} style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item label="Brand" name="brand" rules={[{ required: true, message: 'Please select the brand!' }]}>
+                                <Select placeholder="Select Brand">
+                                    {Object.values(Brand).map((brand) => (
+                                        <Select.Option key={brand} value={brand}>{brand}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item label="Category" name="category">
+                                <Select placeholder="Select Type" onChange={(value) => setProductType(value)}>
+                                    {['Clothing', 'Shoes', 'Pants'].map(type => (
+                                        <Select.Option key={type} value={type}>{type}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item label="Size" name="size" rules={[{ required: true, message: 'Please select the size!' }]}>
+                                <Select placeholder="Select Size">
+                                    {sizeOptions[productType].map(size => (
+                                        <Select.Option key={size} value={size}>{size}</Select.Option>
+                                    ))}
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Form.Item
+                        label="Upload Images (JPG, PNG, JPEG only)"
+                        style={{ marginBottom: 16 }}
+                        labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }}
+                    >
+                        <Upload
+                            accept=".png,.jpg,.jpeg"
+                            multiple
+                            fileList={imageList}
+                            beforeUpload={(file) => {
+                                const isValidSize = file.size <= MAX_SIZE_BYTES;
+                                if (!isValidSize) {
+                                    notification.error({
+                                        message: 'Error',
+                                        description: `Each image must be less than 5 MB.`,
+                                    });
+                                }
+                                return isValidSize;
+                            }}
+                            onChange={handleImageChange}
+                        >
+                            <Button
+                                icon={<UploadOutlined />}
+                                style={{
+                                    backgroundColor: '#4CAF50',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    padding: '8px 16px',
+                                    borderRadius: '4px',
+                                    border: 'none',
+                                    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                }}
+                            >
+                                Select Images
+                            </Button>
+                        </Upload>
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Upload Files (TXT, PDF, DOC only)"
+                        style={{ marginBottom: 16 }}
+                        labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }}
+                    >
+                        <Upload
+                            accept=".txt,.pdf,.doc"
+                            multiple
+                            fileList={fileList}
+                            beforeUpload={(file) => {
+                                const isValidSize = file.size <= MAX_SIZE_BYTES;
+                                if (!isValidSize) {
+                                    notification.error({
+                                        message: 'Error',
+                                        description: `Each file must be less than 5 MB.`,
+                                    });
+                                }
+                                return isValidSize;
+                            }}
+                            onChange={handleFileChange}
+                        >
+                            <Button
+                                icon={<UploadOutlined />}
+                                style={{
+                                    backgroundColor: '#4CAF50',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    padding: '8px 16px',
+                                    borderRadius: '4px',
+                                    border: 'none',
+                                    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                                }}
+                            >
+                                Select Files
+                            </Button>
+                        </Upload>
+                    </Form.Item>
+                </Form>
+            </Modal> */}
+            {isEditModalVisible && selectedProductId && (
+                <UpdateModal
+                    visible={isEditModalVisible}
+                    productId={selectedProductId}
+                    onClose={() => setIsEditModalVisible(false)}
+                    onUpdate={() => {
+                        // Thêm logic cập nhật sau khi chỉnh sửa nếu cần
+                        setIsEditModalVisible(false);
+                    }}
+                />
+            )}
 
 
 

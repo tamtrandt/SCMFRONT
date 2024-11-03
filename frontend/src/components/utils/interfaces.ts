@@ -37,8 +37,8 @@ export interface GetProductOnChain {
     category: string;
     size: string;
     status: string;
-    store: string;
-    cids: string[];
+    imagecids: string[];
+    filecids: string[];
     creater: string;
 
 }

@@ -32,13 +32,24 @@ export const createProduct = async (product: CreateProduct) => {
           method: 'POST',
           body: formData, // Gửi formData trực tiếp
       });
-
       return data; // Trả về dữ liệu sau khi thành công
   } catch (error) {
       console.error('Error creating product:', error);
       throw error; // Ném lỗi ra để frontend có thể xử lý
   }
 };
+
+
+
+export const updateProduct = async (id: string , productData: any) => {
+ 
+  
+      return await fetchAPI(`/products/update/${id}`, {
+        method: 'PUT',
+        body: productData,
+      });
+    };
+    
 
 // Hàm gọi API để lấy tất cả sản phẩm
 export const getAllProductOffChain = async () => {
@@ -107,17 +118,6 @@ export const deleteProduct = async (id: string) => {
 
 
 
-
-export const updateProduct = async (id: string , productData: any) => {
-      return await fetchAPI(`/products/update/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: productData,
-      });
-    };
-    
 
 
 
