@@ -13,31 +13,31 @@ interface ProductOffChainCardProps {
 }
 
 export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id }) => {
-    const [product, setProduct] = useState<any>(null); // Trạng thái để lưu dữ liệu sản phẩm
+    const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const data = await getProductOffChain(id); // Gọi API
-                setProduct(data); // Giả định dữ liệu trả về đúng định dạng
+                const data = await getProductOffChain(id);
+                setProduct(data);
             } catch (error) {
-                setError('Failed to fetch product details.'); // Lưu lỗi nếu có
+                setError('Failed to fetch product details.');
             } finally {
-                setLoading(false); // Đặt trạng thái loading là false
+                setLoading(false);
             }
         };
 
-        fetchProduct(); // Gọi hàm fetch sản phẩm
+        fetchProduct();
     }, [id]);
 
     if (loading) {
-        return <div><Spin size="large" /></div>; // Hiển thị loading
+        return <div><Spin size="large" /></div>;
     }
 
     if (error) {
-        return <div>{error}</div>; // Hiển thị thông báo lỗi
+        return <div>{error}</div>;
     }
 
     return (
@@ -69,15 +69,10 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id }) 
                 </Col>
                 <Col span={12}>
                     <p style={{ fontSize: '14px', marginBottom: '8px' }}>
-                        <strong>Updated At:</strong> {new Date(product.update_at).toLocaleString()}
+                        <strong>Last Update:</strong> {new Date(product.update_at).toLocaleString()}
                     </p>
                 </Col>
 
-                <Col span={24}>
-                    <p style={{ fontSize: '14px', marginTop: '10px' }}>
-                        <strong>Status:</strong> {product.isDeleted ? 'Deleted' : 'Active'}
-                    </p>
-                </Col>
             </Row>
         </>
     );
