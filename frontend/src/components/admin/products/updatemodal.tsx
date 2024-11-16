@@ -12,12 +12,12 @@ interface UpdateModalProps {
     visible: boolean;
     productId: string;
     onClose: () => void;
-    onUpdate: () => void;
+
 }
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
-export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, onClose, onUpdate }) => {
+export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, onClose }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [productType, setProductType] = useState<'Clothing' | 'Shoes' | 'Pants'>('Clothing');
@@ -66,12 +66,8 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             // Thêm các CIDs đã được lọc vào formData
             const filteredImageCids = filteredCids(imagecids);
             const filteredFileCids = filteredCids(filecids);
-
             filteredImageCids.forEach((cid: string) => formData.append('imagecids', cid));
             filteredFileCids.forEach((cid: string) => formData.append('filecids', cid));
-            // Log payload để kiểm tra
-            console.log([...filteredImageCids, ...filteredFileCids]);
-
             newFiles.forEach(file => formData.append('newFiles', file));
 
 
@@ -87,11 +83,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                 message: 'Product updated successfully',
             });
 
-            onUpdate();
-            // Tải lại chi tiết sản phẩm ngay lập tức
-            const updatedProduct = await getProductOnChain(productId);
-            setProductData(updatedProduct);
-            form.setFieldsValue(updatedProduct);
+
 
             onClose();
             form.resetFields();

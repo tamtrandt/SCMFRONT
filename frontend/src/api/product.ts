@@ -44,11 +44,14 @@ export const createProduct = async (product: CreateProduct) => {
 export const updateProduct = async (id: string , productData: any) => {
  
   
-      return await fetchAPI(`/products/update/${id}`, {
+  const data = await fetchAPI(`/products/update/${id}`, {
         method: 'PUT',
         body: productData,
       });
-    };
+      console.log(data);
+      return data;
+     
+};
     
 
 // Hàm gọi API để lấy tất cả sản phẩm
