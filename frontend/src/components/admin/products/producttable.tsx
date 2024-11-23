@@ -24,7 +24,7 @@ const ProductTable = () => {
         setProducts((prevProducts) => [newProduct, ...prevProducts]); // Thêm sản phẩm vào cuối mảng
     };
 
-    const handleProductDeleted = (productId: string) => {
+    const handleProductDeleted = (productId: number) => {
         setProducts((prevProducts) => prevProducts.filter(product => product.id !== productId)); // Cập nhật danh sách sau khi xóa
     };
 
@@ -37,11 +37,11 @@ const ProductTable = () => {
 
             // Kiểm tra xem có dữ liệu không
             if (data && data.product_ids && data.product_ids.length > 0) {
-                setProducts(data.product_ids.map((id: string) => ({ id }))); // Chuyển đổi dữ liệu từ backend
+                setProducts(data.product_ids.map((id: number) => ({ id }))); // Chuyển đổi dữ liệu từ backend
             } else {
                 // Nếu không có dữ liệu, gọi hàm để lấy dữ liệu on-chain
                 const onChainData = await getAllProductOnChain();
-                setProducts(onChainData.product_ids.map((id: string) => ({ id }))); // Chuyển đổi dữ liệu từ blockchain
+                setProducts(onChainData.product_ids.map((id: number) => ({ id }))); // Chuyển đổi dữ liệu từ blockchain
             }
         };
 

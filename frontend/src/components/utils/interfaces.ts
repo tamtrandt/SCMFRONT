@@ -18,7 +18,7 @@ export interface CreateProduct {
 
 
 export interface GetProductOffChain {
-    id: string;
+    id: number;
     transactionHash: string;
     isDeleted: boolean;
     create_at: Date;
@@ -28,7 +28,7 @@ export interface GetProductOffChain {
 }
 
 export interface GetProductOnChain {
-    id: string;
+    id: number;
     name: string;
     description: string;
     price: number;

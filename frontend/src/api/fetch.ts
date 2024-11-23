@@ -49,3 +49,15 @@ export const fetchAPI = async (endpoint: string, options: FetchOptions) => {
 
   return data; // Trả về dữ liệu từ API
 };
+
+
+export const fetchAPIJsol = async (url: string, options: RequestInit) => {
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'API request failed');
+  }
+
+  return response.json();
+};

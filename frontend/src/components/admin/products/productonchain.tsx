@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 
 
 interface ProductOnChainCardProps {
-    id: string;
+    id: number;
 }
 
 export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) => {
@@ -29,7 +29,6 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
 
             try {
                 const data = await getProductOnChain(id); // Gọi API để lấy dữ liệu sản phẩm
-
 
                 // Thiết lập trạng thái cho sản phẩm từ dữ liệu trả về
                 setProduct({
@@ -87,7 +86,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
 
             <Row gutter={16}>
                 <Col span={12}>
-                    <p style={{ fontWeight: 'bold' }}><strong>Price:</strong> ${product.price.toFixed(2)}</p>
+                    <p style={{ fontWeight: 'bold' }}><strong>Price:</strong> {product.price} ETH</p>
                 </Col>
                 <Col span={12}>
                     <p style={{ fontWeight: 'bold' }}><strong>Quantity:</strong> {product.quantity}</p>

@@ -14,16 +14,16 @@ import { UpdateModal } from './updatemodal';
 
 interface ProductListProps {
     products: GetProductOffChain[];
-    onProductDeleted: (productId: string) => void; // Thêm callback này
+    onProductDeleted: (productId: number) => void; // Thêm callback này
 
 }
 
 export const ProductList = ({ products, onProductDeleted }: ProductListProps) => {
-    const [viewOnChain, setViewOnChain] = useState<Record<string, boolean>>({});
+    const [viewOnChain, setViewOnChain] = useState<Record<number, boolean>>({});
     const [paginatedProducts, setPaginatedProducts] = useState<GetProductOffChain[]>([]);
     const pageSize = 4;
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+    const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
 
 
     useEffect(() => {
@@ -31,7 +31,7 @@ export const ProductList = ({ products, onProductDeleted }: ProductListProps) =>
         setPaginatedProducts(products.slice(0, pageSize));
     }, [products]);
 
-    const handleViewOnChain = (id: string) => {
+    const handleViewOnChain = (id: number) => {
         setViewOnChain((prevState) => ({
             ...prevState,
             [id]: !prevState[id],
@@ -42,7 +42,7 @@ export const ProductList = ({ products, onProductDeleted }: ProductListProps) =>
         setPaginatedProducts(newPaginatedProducts);
     };
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (id: number) => {
         Modal.confirm({
             title: 'Xác nhận xóa sản phẩm',
             content: 'Bạn có chắc chắn muốn xóa sản phẩm này?',
@@ -73,7 +73,7 @@ export const ProductList = ({ products, onProductDeleted }: ProductListProps) =>
         });
     };
 
-    const handleEdit = (productId: string) => {
+    const handleEdit = (productId: number) => {
         setSelectedProductId(productId);
         setIsEditModalVisible(true);
     };

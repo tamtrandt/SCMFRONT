@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 
 
 interface ProductOffChainCardProps {
-    id: string;
+    id: number;
 }
 
 export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id }) => {
@@ -49,7 +49,7 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id }) 
                     <div style={{ fontSize: '14px', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
                         <strong style={{ flexShrink: 0 }}>Product ID:</strong>
                         <span style={{ marginLeft: '10px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                            <FormatAndCopyHash hash={product.id} />
+                            {product.id}
                         </span>
                     </div>
                     <div style={{ fontSize: '14px', display: 'flex', alignItems: 'center', marginBottom: '10px' }}>

@@ -4,13 +4,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Upload, Button, notification, Row, Col, UploadFile, List, Checkbox } from 'antd';
 import { DeleteOutlined, UploadOutlined } from '@ant-design/icons';
-import { getProductOnChain, updateProduct } from '@/api/product';
+import { getProductOnChain, updateMetadata, updatePrice, updateQuantity } from '@/api/product';
 import { validateFileUpload } from '@/components/utils/functions';
 import { Brand, GetProductOnChain, sizeOptions } from '@/components/utils/interfaces';
 
+
 interface UpdateModalProps {
     visible: boolean;
-    productId: string;
+    productId: number;
     onClose: () => void;
 
 }
@@ -34,7 +35,10 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
         if (productId) {
             // Fetch product data and populate form (giả định một hàm fetchProductById)
             getProductOnChain(productId).then((product) => {
-                form.setFieldsValue(product);
+                form.setFieldsValue({
+                    ...product, // Make sure the product data gets set
+                    id: productId, // Explicitly set the product ID in the form fields
+                });
                 setProductData(product);
                 setProductType(product.category);
             });
@@ -46,14 +50,12 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
     const filecids = form.getFieldValue('filecids') || [];
 
 
-
     const handleEditModalOk = async () => {
         try {
             const values = await form.validateFields();
             setLoading(true);
             const newFiles = [...fileList, ...imageList].map((file) => file.originFileObj as File);
             const formData = new FormData();
-            // Thêm các trường dữ liệu sản phẩm
             formData.append('id', values.id);
             formData.append('name', values.name);
             formData.append('description', values.description);
@@ -63,7 +65,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             formData.append('category', values.category);
             formData.append('size', values.size);
             formData.append('status', values.status);
-            // Thêm các CIDs đã được lọc vào formData
+
             const filteredImageCids = filteredCids(imagecids);
             const filteredFileCids = filteredCids(filecids);
             filteredImageCids.forEach((cid: string) => formData.append('imagecids', cid));
@@ -77,13 +79,11 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             // Log payload để kiểm tra
 
             // Update product logic (giả định một hàm updateProduct)
-            await updateProduct(productId, formData);
+            await updateMetadata(productId, formData);
 
             notification.success({
                 message: 'Product updated successfully',
             });
-
-
 
             onClose();
             form.resetFields();
@@ -101,6 +101,54 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             onClose();
         }
     };
+
+    // Hàm cập nhật giá (Price)
+    const handleUpdatePrice = async () => {
+        try {
+            const values = await form.validateFields(); // Validate form
+            setLoading(true);
+            const price = values.price.toString();  // Ensure price is a string
+            // Call the API to update the price
+            await updatePrice(productId, price);
+
+            notification.success({
+                message: 'Price updated successfully',
+            });
+        } catch (error) {
+            console.error('Error updating price:', error);
+            notification.error({
+                message: 'Error updating price',
+                description: 'An error occurred while updating the price.',
+            });
+        } finally {
+            setLoading(false); // Set loading to false after completion
+        }
+    };
+
+
+    // Hàm cập nhật số lượng (Quantity)
+    const handleUpdateQuantity = async () => {
+        try {
+            const values = await form.validateFields(); // Validate form
+            setLoading(true);
+            const quantity = values.quantity;  // Ensure price is a string
+            // Call the API to update the price
+            await updateQuantity(productId, quantity);
+
+            notification.success({
+                message: 'Quantity updated successfully',
+            });
+        } catch (error) {
+            console.error('Error updating quantity:', error);
+            notification.error({
+                message: 'Error updating quantity',
+                description: 'An error occurred while updating the quantity.',
+            });
+        } finally {
+            setLoading(false); // Set loading to false after completion
+        }
+    };
+
 
     const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
         const validatedList = validateFileUpload(newFileList, imageList, 5, notification);
@@ -146,6 +194,17 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             onOk={handleEditModalOk}
             onCancel={onClose}
             confirmLoading={loading}
+            footer={[
+                <Button key="updatePrice" onClick={handleUpdatePrice} style={{ backgroundColor: '#FF9800', color: '#fff' }}>
+                    Update Price
+                </Button>,
+                <Button key="updateQuantity" onClick={handleUpdateQuantity} style={{ backgroundColor: '#3F51B5', color: '#fff' }}>
+                    Update Quantity
+                </Button>,
+                <Button key="update" type="primary" onClick={handleEditModalOk} loading={loading}>
+                    Update
+                </Button>,
+            ]}
         >
             <Form form={form} layout="vertical">
                 <Form.Item
