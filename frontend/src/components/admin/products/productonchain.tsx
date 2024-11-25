@@ -1,24 +1,29 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import { getProductOnChain } from '@/api/product';
+import { deleteProduct, getProductOnChain } from '@/api/product';
 import FormatAndCopyHash from '@/components/componentspage/hash';
 import { ImageDisplay } from '@/components/componentspage/image';
-import { Col, Row, Spin } from 'antd';
+import { DeleteOutlined, EditOutlined, SyncOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Modal, notification, Row, Spin } from 'antd';
 import React, { useEffect, useState } from 'react';
-
-
+import { UpdateModal } from './updatemodal';
+import { ProductOffChainCard } from './productoffchain';
 
 
 interface ProductOnChainCardProps {
     id: number;
 }
-
 export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) => {
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [viewOnChain, setViewOnChain] = useState<boolean>(true); // Điều khiển trạng thái On/Off chain
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
+    const [visible, setVisible] = useState(false); // For OffChain modal
 
+    // Fetch product details from API
     useEffect(() => {
         const fetchProduct = async () => {
             if (!id) {
@@ -28,11 +33,9 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
             }
 
             try {
-                const data = await getProductOnChain(id); // Gọi API để lấy dữ liệu sản phẩm
-
-                // Thiết lập trạng thái cho sản phẩm từ dữ liệu trả về
+                const data = await getProductOnChain(id);
                 setProduct({
-                    id: data.id, // Lấy ID từ dữ liệu trả về
+                    id: data.id,
                     name: data.name,
                     description: data.description,
                     price: data.price,
@@ -42,67 +45,160 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
                     size: data.size,
                     status: data.status,
                     imagecids: data.imagecids,
-                    filecids: data.filecids, // Sử dụng cids trực tiếp từ dữ liệu
+                    filecids: data.filecids,
                     creater: data.creater,
                 });
             } catch (error) {
                 setError('Failed to fetch product details.');
-                console.error(error); // Log lỗi ra console
+                console.error(error);
             } finally {
-                setLoading(false); // Kết thúc trạng thái loading
+                setLoading(false);
             }
         };
 
-        fetchProduct(); // Gọi hàm fetch sản phẩm
+        fetchProduct();
     }, [id]);
 
     if (loading) {
-        return <div><Spin size="large" /></div>; // Hiển thị loading
+        return <Spin size="large" />; // Hiển thị loading
     }
 
     if (error) {
         return <div>{error}</div>; // Hiển thị thông báo lỗi
     }
 
+    // Xử lý khi bấm vào nút Sync Data
+    const handleViewOnChain = () => {
+        setViewOnChain(!viewOnChain); // Chuyển đổi giữa trạng thái On/Off chain
+    };
 
+    const handleDelete = (id: number) => {
+        Modal.confirm({
+            title: 'Xác nhận xóa sản phẩm',
+            content: 'Bạn có chắc chắn muốn xóa sản phẩm này?',
+            okText: 'Có',
+            okType: 'danger',
+            cancelText: 'Không',
+            onOk: async () => {
+                try {
+                    const result = await deleteProduct(id);
+                    notification.success({
+                        message: 'Xóa sản phẩm thành công',
+                        description: result.message,
+                    });
+                } catch (error) {
+                    console.error('Lỗi khi xóa sản phẩm:', error);
+                    notification.error({
+                        message: 'Lỗi khi xóa sản phẩm',
+                        description: 'Đã xảy ra lỗi khi xóa sản phẩm.',
+                    });
+                }
+            },
+            onCancel() {
+                console.log('Đã hủy xóa sản phẩm');
+            },
+        });
+    };
 
+    const handleEdit = (productId: number) => {
+        setSelectedProductId(productId);
+        setIsEditModalVisible(true);
+    };
 
+    // Xử lý khi bấm vào nút Sync Data (hiện giờ là nút mở modal OffChain)
+    const handleOpenOffChainModal = () => {
+        setVisible(true); // Mở modal OffChain
+    };
+
+    const handleClose = () => {
+        setVisible(false); // Đóng modal
+    };
 
     return (
         <>
-            <ImageDisplay imagecids={product.imagecids} />
-            <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
-                <strong>Creator:</strong>
-                <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
-                    <FormatAndCopyHash hash={product.creater} />
-                </span>
-            </div>
-            <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
-                <strong>Name:</strong> {product.name}
-            </div>
-            <div style={{ marginBottom: '16px', color: '#666' }}>
-                <strong>Description:</strong> {product.description}
-            </div>
+            <Card
+                bordered={false}
+                style={{
+                    height: '555px', // Có thể điều chỉnh chiều cao cố định nếu cần
+                    width: '300px',
+                    padding: '5px',
+                    border: '3px solid black',
+                    borderRadius: '10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                }}
+            >
+                <div style={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
+                    {/* Nút Sync Data bên trái */}
+                    {/* Nút thông thường để mở modal OffChain */}
+                    <Button
+                        onClick={handleOpenOffChainModal} // Mở modal OffChain khi click
+                        style={{
+                            backgroundColor: '#faad14', // Màu sắc của nút
+                            color: '#fff',
+                        }}
+                    >
+                        Xem Off-Chain
+                    </Button>
 
-            <Row gutter={16}>
-                <Col span={12}>
-                    <p style={{ fontWeight: 'bold' }}><strong>Price:</strong> {product.price} ETH</p>
-                </Col>
-                <Col span={12}>
-                    <p style={{ fontWeight: 'bold' }}><strong>Quantity:</strong> {product.quantity}</p>
-                </Col>
-            </Row>
+                    {/* Hiển thị ProductOffChainCard khi nút được click */}
+                    <ProductOffChainCard
+                        id={product.id}
+                        visible={visible} // Điều khiển mở/đóng modal OffChain
+                        onClose={handleClose} // Đóng modal khi người dùng bấm vào Close
+                    />
 
-            <Row gutter={16}>
-                <Col span={12}>
-                    <p style={{ fontWeight: 'bold' }}><strong>Brand:</strong> {product.brand}</p>
-                </Col>
-                <Col span={12}>
-                    <p style={{ fontWeight: 'bold' }}><strong>Size:</strong> {product.size}</p>
-                </Col>
-            </Row>
+                    {/* Container cho các nút Edit và Delete bên phải */}
+                    <Button type="primary" onClick={() => handleEdit(product.id)}>
+                        <EditOutlined />
+                    </Button>
+                    <Button type="default" danger onClick={() => handleDelete(product.id)}>
+                        <DeleteOutlined />
+                    </Button>
+                </div>
 
+                {/* Nội dung hiển thị trong card */}
+                <ImageDisplay imagecids={product.imagecids} />
+                <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+                    <strong>Creator:</strong>
+                    <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
+                        <FormatAndCopyHash hash={product.creater} />
+                    </span>
+                </div>
+                <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
+                    <strong>Name:</strong> {product.name}
+                </div>
+                <div style={{ marginBottom: '16px', color: '#666' }}>
+                    <strong>Description:</strong> {product.description}
+                </div>
 
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <p style={{ fontWeight: 'bold' }}><strong>Price:</strong> {product.price} ETH</p>
+                    </Col>
+                    <Col span={12}>
+                        <p style={{ fontWeight: 'bold' }}><strong>Quantity:</strong> {product.quantity}</p>
+                    </Col>
+                </Row>
+
+                <Row gutter={16}>
+                    <Col span={12}>
+                        <p style={{ fontWeight: 'bold' }}><strong>Brand:</strong> {product.brand}</p>
+                    </Col>
+                    <Col span={12}>
+                        <p style={{ fontWeight: 'bold' }}><strong>Size:</strong> {product.size}</p>
+                    </Col>
+                </Row>
+            </Card>
+
+            {isEditModalVisible && selectedProductId && (
+                <UpdateModal
+                    visible={isEditModalVisible}
+                    productId={selectedProductId}
+                    onClose={() => setIsEditModalVisible(false)}
+                />
+            )}
         </>
     );
 };

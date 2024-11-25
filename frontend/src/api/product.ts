@@ -4,7 +4,7 @@
 
 
 import { CreateProduct } from "@/components/utils/interfaces";
-import { fetchAPI, fetchAPIJsol } from "./fetch";
+import { fetchAPI } from "./fetch";
 
 
 
@@ -73,19 +73,19 @@ return data;
     
 
 // Hàm gọi API để lấy tất cả sản phẩm
-export const getAllProductOffChain = async () => {
-  try {
-    // Gọi API lấy danh sách sản phẩm từ endpoint
-    const data = await fetchAPI('/products/offchainall/all', {
-      method: 'GET',
-    });
+// export const getAllProductOffChain = async () => {
+//   try {
+//     // Gọi API lấy danh sách sản phẩm từ endpoint
+//     const data = await fetchAPI('/products/offchainall/all', {
+//       method: 'GET',
+//     });
 
-    return data; // Trả về dữ liệu sau khi thành công
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error; // Ném lỗi ra để frontend có thể xử lý
-  }
-};
+//     return data; // Trả về dữ liệu sau khi thành công
+//   } catch (error) {
+//     console.error('Error fetching products:', error);
+//     throw error; // Ném lỗi ra để frontend có thể xử lý
+//   }
+// };
 // Hàm gọi API để lấy sản phẩm theo ID OFF CHAIN
 export const getProductOffChain = async (id: number) => {
   try {

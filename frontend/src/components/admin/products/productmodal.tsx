@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // ProductForm.tsx
 'use client'
@@ -6,13 +7,13 @@ import { Button, Modal, Form, Input, InputNumber, Upload, notification, Row, Col
 import { UploadOutlined } from '@ant-design/icons';
 import { UploadFile } from 'antd/es/upload/interface';
 import { createProduct } from '@/api/product';
-import { Brand, GetProductOffChain, sizeOptions } from '@/components/utils/interfaces';
+import { Brand, sizeOptions } from '@/components/utils/interfaces';
 import { MAX_SIZE_BYTES, validateFileUpload } from '@/components/utils/functions';
 
 interface ProductFormProps {
     isOpen: boolean;
     onClose: () => void;
-    onProductCreated: (product: GetProductOffChain) => void;
+    onProductCreated: (data: any) => void;
 
 }
 
@@ -40,17 +41,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                 files,
             });
 
-
-            const newProduct: GetProductOffChain = {
-                id: data.id,
-                transactionHash: data.transactionHash,
-                isDeleted: data.isDeleted,
-                create_at: new Date(data.create_at),
-                update_at: new Date(data.update_at),
-                qrcode: data.qrcode,
-            };
-
-            onProductCreated(newProduct);
+            onProductCreated(data);
             notification.success({
                 message: 'Product Created',
                 description: 'The product has been created successfully!',

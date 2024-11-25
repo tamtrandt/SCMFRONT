@@ -18,11 +18,7 @@ export interface CreateProduct {
 
 
 export interface GetProductOffChain {
-    id: number;
-    transactionHash: string;
-    isDeleted: boolean;
-    create_at: Date;
-    update_at: Date;
+    TokenId: number;
     qrcode: string[];
    
 }
