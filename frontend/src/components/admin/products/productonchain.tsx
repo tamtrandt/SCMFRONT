@@ -13,8 +13,9 @@ import { ProductOffChainCard } from './productoffchain';
 
 interface ProductOnChainCardProps {
     id: number;
+    onDeleteSuccess: (tokenId: number) => void;
 }
-export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) => {
+export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDeleteSuccess }) => {
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -85,6 +86,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
             onOk: async () => {
                 try {
                     const result = await deleteProduct(id);
+                    onDeleteSuccess(id); // Truyền id của sản phẩm đã xóa
                     notification.success({
                         message: 'Xóa sản phẩm thành công',
                         description: result.message,

@@ -26,6 +26,14 @@ const ProductTable = () => {
     const handleCancel = () => {
         setIsModalOpen(false);
     };
+    const handleTokenIdDelete = (tokenId: number) => {
+        // Xóa sản phẩm khỏi danh sách products
+        setProducts((prevProducts) => prevProducts.filter((product) => product.id !== tokenId));
+
+        // Cập nhật lại paginatedProducts
+        setPaginatedProducts((prevProducts) => prevProducts.filter((product) => product.id !== tokenId));
+    };
+
 
     // Hàm xử lý khi tạo sản phẩm thành công
     const handleProductCreated = async (tokenId: number) => {
@@ -119,7 +127,7 @@ const ProductTable = () => {
                                 {paginatedProducts.map((product) => (
                                     <Col span={6} key={product.id}>
                                         {/* Hiển thị từng sản phẩm */}
-                                        <ProductOnChainCard id={product.id} />
+                                        <ProductOnChainCard id={product.id} onDeleteSuccess={handleTokenIdDelete} />
                                     </Col>
                                 ))}
                             </Row>
