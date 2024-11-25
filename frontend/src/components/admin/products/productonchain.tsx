@@ -6,7 +6,7 @@ import FormatAndCopyHash from '@/components/componentspage/hash';
 import { ImageDisplay } from '@/components/componentspage/image';
 import { DeleteOutlined, EditOutlined, SyncOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Modal, notification, Row, Spin } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { UpdateModal } from './updatemodal';
 import { ProductOffChainCard } from './productoffchain';
 
@@ -24,40 +24,47 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
     const [visible, setVisible] = useState(false); // For OffChain modal
 
     // Fetch product details from API
+    // Định nghĩa fetchProduct ở ngoài useEffect
+    const fetchProduct = useCallback(async () => {
+        if (!id) {
+            setError('Product ID is required.');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true); // Đảm bảo loading được set đúng trạng thái
+            const data = await getProductOnChain(id);
+            setProduct({
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                price: data.price,
+                quantity: data.quantity,
+                brand: data.brand,
+                category: data.category,
+                size: data.size,
+                status: data.status,
+                imagecids: data.imagecids,
+                filecids: data.filecids,
+                creater: data.creater,
+            });
+        } catch (error) {
+            setError('Failed to fetch product details.');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }, [id]); // Phụ thuộc vào id
+
+    // Gọi fetchProduct trong useEffect khi id thay đổi
     useEffect(() => {
-        const fetchProduct = async () => {
-            if (!id) {
-                setError('Product ID is required.');
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const data = await getProductOnChain(id);
-                setProduct({
-                    id: data.id,
-                    name: data.name,
-                    description: data.description,
-                    price: data.price,
-                    quantity: data.quantity,
-                    brand: data.brand,
-                    category: data.category,
-                    size: data.size,
-                    status: data.status,
-                    imagecids: data.imagecids,
-                    filecids: data.filecids,
-                    creater: data.creater,
-                });
-            } catch (error) {
-                setError('Failed to fetch product details.');
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchProduct();
-    }, [id]);
+    }, [fetchProduct]);
+
+    const handleUpdateSuccess = () => {
+        fetchProduct(); // Hàm fetch lại data sau khi update thành công
+    };
 
     if (loading) {
         return <Spin size="large" />; // Hiển thị loading
@@ -67,10 +74,6 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
         return <div>{error}</div>; // Hiển thị thông báo lỗi
     }
 
-    // Xử lý khi bấm vào nút Sync Data
-    const handleViewOnChain = () => {
-        setViewOnChain(!viewOnChain); // Chuyển đổi giữa trạng thái On/Off chain
-    };
 
     const handleDelete = (id: number) => {
         Modal.confirm({
@@ -104,6 +107,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
         setSelectedProductId(productId);
         setIsEditModalVisible(true);
     };
+
 
     // Xử lý khi bấm vào nút Sync Data (hiện giờ là nút mở modal OffChain)
     const handleOpenOffChainModal = () => {
@@ -197,6 +201,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id }) =>
                     visible={isEditModalVisible}
                     productId={selectedProductId}
                     onClose={() => setIsEditModalVisible(false)}
+                    onUpdateSuccess={handleUpdateSuccess}
                 />
             )}
         </>

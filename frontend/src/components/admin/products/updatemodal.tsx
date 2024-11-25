@@ -13,12 +13,13 @@ interface UpdateModalProps {
     visible: boolean;
     productId: number;
     onClose: () => void;
+    onUpdateSuccess: () => void;
 
 }
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
-export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, onClose }) => {
+export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, onUpdateSuccess, onClose }) => {
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [productType, setProductType] = useState<'Clothing' | 'Shoes' | 'Pants'>('Clothing');
@@ -80,6 +81,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
 
             // Update product logic (giả định một hàm updateProduct)
             await updateMetadata(productId, formData);
+            onUpdateSuccess();
 
             notification.success({
                 message: 'Product updated successfully',
@@ -114,6 +116,8 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             notification.success({
                 message: 'Price updated successfully',
             });
+
+            onUpdateSuccess(); // Gọi callback
         } catch (error) {
             console.error('Error updating price:', error);
             notification.error({
@@ -122,6 +126,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             });
         } finally {
             setLoading(false); // Set loading to false after completion
+            onClose();
         }
     };
 
@@ -136,6 +141,8 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             notification.success({
                 message: 'Quantity updated successfully',
             });
+
+            onUpdateSuccess(); // Gọi callback
         } catch (error) {
             console.error('Error updating quantity:', error);
             notification.error({
@@ -144,6 +151,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             });
         } finally {
             setLoading(false); // Set loading to false after completion
+            onClose();
         }
     };
 
