@@ -166,12 +166,19 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
 
                 {/* Nội dung hiển thị trong card */}
                 <ImageDisplay imagecids={product.imagecids} />
-                <div style={{ fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
                     <strong>Creator:</strong>
                     <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
                         <FormatAndCopyHash hash={product.creater} />
                     </span>
                 </div>
+                <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+                    <strong>Token Id:</strong>
+                    <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
+                        {product.id}
+                    </span>
+                </div>
+
                 <div style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '8px' }}>
                     <strong>Name:</strong> {product.name}
                 </div>
