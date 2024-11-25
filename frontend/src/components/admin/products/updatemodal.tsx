@@ -131,9 +131,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
         try {
             const values = await form.validateFields(); // Validate form
             setLoading(true);
-            const quantity = values.quantity;  // Ensure price is a string
-            // Call the API to update the price
-            await updateQuantity(productId, quantity);
+            await updateQuantity(productId, values.quantity);
 
             notification.success({
                 message: 'Quantity updated successfully',
