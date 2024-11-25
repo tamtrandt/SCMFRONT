@@ -42,11 +42,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
             });
 
             onProductCreated(data);
-            notification.success({
-                message: 'Product Created',
-                description: 'The product has been created successfully!',
-            });
-
             onClose();
             form.resetFields();
             setFileList([]);
