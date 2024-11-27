@@ -85,3 +85,13 @@ export const sizeOptions = {
     Shoes: ['40', '41', '42', '43', '44'],
     Pants: ['US 30', 'US 32', 'EU 46', 'EU 48'],
 };
+
+
+
+export interface CartItem {
+    id: number;
+    name: string;
+    price: number;
+    quantity: number;
+    availableQuantity: number; // Số lượng tồn kho
+}

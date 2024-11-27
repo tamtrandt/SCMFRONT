@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useContext, useState } from 'react';
@@ -6,28 +6,38 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
     DashboardOutlined,
+    DropboxOutlined,
     FolderOpenOutlined,
+    LinkOutlined,
     ProductOutlined,
     RocketOutlined,
+    ShoppingCartOutlined,
+    ShoppingOutlined,
     TeamOutlined,
     WalletOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import Link from 'next/link';
-import { AdminContext } from "./animation"; // Your AdminContext file
+
 import WalletModal from '@/components/componentspage/walletmodal';
+import { AdminContext } from '@/components/admin/dashboard/animation';
+import CartModal from '../products/cartmodal';
 
 
 type MenuItem = Required<MenuProps>['items'][number];
 
-const AdminSideBar: React.FC = () => {
+const AppSideBar: React.FC = () => {
     const { Sider } = Layout;
     const { collapseMenu } = useContext(AdminContext)!;
     const [walletModalVisible, setWalletModalVisible] = useState(false);
+    const [cartModalVisible, setCartModalVisible] = useState(false);
 
     // Handlers for wallet modal
     const openWalletModal = () => setWalletModalVisible(true);
     const closeWalletModal = () => setWalletModalVisible(false);
+    // Open/Close Cart Modal
+    const openCartModal = () => setCartModalVisible(true);
+    const closeCartModal = () => setCartModalVisible(false);
 
     // Sidebar menu items
     const items: MenuItem[] = [
@@ -37,38 +47,40 @@ const AdminSideBar: React.FC = () => {
             type: 'group',
             children: [
                 {
-                    key: "dashboard",
-                    label: <Link href={"/dashboard"}>Dashboard</Link>,
+                    key: "home",
+                    label: <Link href={"/home"}>Home</Link>,
                     icon: <DashboardOutlined />,
                 },
                 {
-                    key: "users",
-                    label: <Link href={"/dashboard/users"}>Manage Users</Link>,
-                    icon: <TeamOutlined />,
+                    key: "products",
+                    label: <Link href={"/home/products"}>Marketplace</Link>,
+                    icon: <ProductOutlined />,
                 },
                 {
-                    key: "products",
-                    label: 'Manage Products',
-                    icon: <ProductOutlined />,
-                    children: [
-                        {
-                            key: "storage",
-                            label: <Link href={"/dashboard/products"}>Storage</Link>,
-                            icon: <FolderOpenOutlined />,
-                        },
-                        {
-                            key: "releasing",
-                            label: <Link href={""}>Releasing</Link>,
-                            icon: <RocketOutlined />,
-                        },
-                    ],
+                    key: "cart",
+                    label: "Cart",
+                    icon: <ShoppingOutlined />,
+                    onClick: openCartModal, // Open Cart Modal on click
                 },
                 {
                     key: "wallet",
-                    label: "Connect Wallet",
+                    label: 'Wallet',
                     icon: <WalletOutlined />,
-                    onClick: openWalletModal, // Open modal on click
+                    children: [
+                        {
+                            key: "wallet",
+                            label: "Connect Wallet",
+                            icon: <LinkOutlined />,
+                            onClick: openWalletModal, // Open modal on click
+                        },
+                        {
+                            key: "store",
+                            label: <Link href={""}>Storage</Link>,
+                            icon: <DropboxOutlined />,
+                        },
+                    ],
                 },
+
             ],
         },
     ];
@@ -89,8 +101,15 @@ const AdminSideBar: React.FC = () => {
                 visible={walletModalVisible}
                 onClose={closeWalletModal}
             />
+
+
+            {/* Cart Modal */}
+            <CartModal
+                visible={cartModalVisible}
+                onClose={closeCartModal}
+            />
         </>
     );
 };
 
-export default AdminSideBar;
+export default AppSideBar;

@@ -1,133 +1,107 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 
-'use client';
-import { Layout } from 'antd';
-import { HomeOutlined, ShoppingCartOutlined, ProfileOutlined, ShoppingOutlined, SearchOutlined } from '@ant-design/icons'; // Import các icon từ Antd
-import Image from 'next/image';
-import Logo from '@/public/images/logo.jpg';
+import { MenuFoldOutlined, MenuUnfoldOutlined, PoweroffOutlined, UserOutlined, WalletOutlined } from '@ant-design/icons';
+import { Button, Layout, message } from 'antd';
+import { useContext, useEffect, useState } from 'react';
+import { DownOutlined } from '@ant-design/icons';
+import type { MenuProps } from 'antd';
+import { Dropdown, Space } from 'antd';
+
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
+
 import Link from 'next/link';
-import { useState } from 'react';
+import { AdminContext } from '@/components/admin/dashboard/animation';
 
-const { Header } = Layout;
+const AppHeader = () => {
+    const { Header } = Layout;
+    const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
+    const router = useRouter(); // Hook để điều hướng trang
 
+    const [username, setUsername] = useState(); // Khởi tạo với giá trị mặc định
 
-export default function AppHeader() {
-    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+    useEffect(() => {
+        const userInfo = localStorage.getItem('user_data'); // Lấy thông tin người dùng từ localStorage
+        if (userInfo) {
+            const parsedUserInfo = JSON.parse(userInfo); // Parse chuỗi JSON thành object
+            if (parsedUserInfo.email) {
+                // Tách tên người dùng từ email
+                const emailParts = parsedUserInfo.email.split('@');
+                if (emailParts.length > 0) {
+                    setUsername(emailParts[0]); // Cập nhật tên người dùng (phần trước @)
+                }
+            }
+        }
+    }, []);
 
+    const handleLogout = () => {
+        localStorage.removeItem('user_data');// Xóa thông tin người dùng khỏi cookies
+        Cookies.remove('access_token'); // Xóa access token khỏi cookies (nếu bạn lưu ở đây)
 
-    const menuItems = [
-        { key: '1', label: 'Home', icon: <HomeOutlined />, link: '' },
-        { key: '2', label: 'Products', icon: <ShoppingOutlined />, link: '' },
-        { key: '3', label: 'Orders', icon: <ShoppingCartOutlined />, link: '' },
-        { key: '4', label: 'Profile', icon: <ProfileOutlined />, link: '' },
+        router.push('/auth/login'); // Chuyển hướng đến trang đăng nhập
+        message.success("Logout successful!"); // Hiển thị thông báo
+    };
+
+    const items: MenuProps['items'] = [
+        {
+            key: '1',
+            label: (
+                <Link href="/home/profile"> {/* Đường dẫn đến trang ProfilePage */}
+                    <span>
+                        <UserOutlined style={{ marginRight: 8 }} /> {/* Icon cho Profile */}
+                        Profile
+                    </span>
+                </Link>
+            ),
+        },
+        {
+            key: '0',
+            danger: true,
+            label: (
+                <span>
+                    <PoweroffOutlined style={{ marginRight: 8 }} /> {/* Icon cho Logout */}
+                    Logout
+                </span>
+            ),
+            onClick: handleLogout, // Thêm hàm gọi khi nhấn
+        },
     ];
 
-    const [searchTerm, setSearchTerm] = useState('');
-
-    const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
-        (e.target as HTMLButtonElement).style.backgroundColor = '#0056b3'; // Hiệu ứng hover cho nút
-    };
-
-    const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
-        (e.target as HTMLButtonElement).style.backgroundColor = '#007bff';
-    };
-
-    const handleClick = () => {
-        // Thực hiện tìm kiếm với searchTerm
-        console.log(`Searching for: ${searchTerm}`);
-    };
-
     return (
-        <Header style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '0 20px',
-            backgroundColor: '#001529',
-        }}>
-            {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+        <>
+            <Header
+                style={{
+                    padding: 0,
+                    display: "flex",
+                    background: "#f5f5f5",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                }} >
 
-                <Image
-                    src={Logo}
-                    alt="Logo"
-                    width={50}
-                    height={50}
-                    style={{
-                        borderRadius: '50%',
-                        cursor: 'pointer',
-                        transition: 'transform 0.3s ease',
-                    }} // Hiệu ứng hover cho logo
-                />
-
-            </div>
-
-            {/* Menu items với thẻ div và hiệu ứng hover, căn giữa, có icon */}
-            <div style={{
-                flex: 1,
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '30px',
-            }}>
-                {menuItems.map(item => (
-                    <Link href={item.link} key={item.key}>
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                color: hoveredItem === item.key ? '#40a9ff' : 'white', // Thay đổi màu khi hover
-                                fontSize: '16px',
-                                padding: '0 15px',
-                                cursor: 'pointer',
-                                transition: 'color 0.3s ease, transform 0.3s ease',
-                                transform: hoveredItem === item.key ? 'scale(1.1)' : 'scale(1)', // Phóng to khi hover
-                            }}
-                            onMouseEnter={() => setHoveredItem(item.key)}
-                            onMouseLeave={() => setHoveredItem(null)}
-                        >
-                            {item.icon} {/* Hiển thị icon bên cạnh label */}
-                            <span style={{ marginLeft: '8px' }}>{item.label}</span> {/* Khoảng cách giữa icon và text */}
-                        </div>
-                    </Link>
-                ))}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-                <input
+                <Button
                     type="text"
-                    placeholder="Search..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    icon={collapseMenu ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                    onClick={() => setCollapseMenu(!collapseMenu)}
                     style={{
-                        width: '300px',
-                        marginRight: '10px',
-                        padding: '10px',
-                        border: '1px solid #ccc',
-                        borderRadius: '5px',
-                        outline: 'none',
-                        transition: 'box-shadow 0.3s ease',
+                        fontSize: '16px',
+                        width: 64,
+                        height: 64,
                     }}
-                    onFocus={(e) => e.target.style.boxShadow = '0 0 10px #40a9ff'}
-                    onBlur={(e) => e.target.style.boxShadow = 'none'}
                 />
-                <button
-                    style={{
-                        padding: '10px 15px',
-                        border: 'none',
-                        borderRadius: '5px',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.3s ease',
-                    }}
-                    onMouseEnter={handleMouseEnter}
-                    onMouseLeave={handleMouseLeave}
-                    onClick={handleClick}
-                    title="Submit form"
-                >
-                    <SearchOutlined />
-                </button>
-            </div>
-
-        </Header>
+                <Dropdown menu={{ items }} >
+                    <a onClick={(e) => e.preventDefault()}
+                        style={{ color: "unset", lineHeight: "0 !important", marginRight: 20 }}
+                    >
+                        <Space>
+                            Welcome {username} {/* Hiển thị tên người dùng */}
+                            <DownOutlined />
+                        </Space>
+                    </a>
+                </Dropdown>
+            </Header>
+        </>
     );
 }
+
+export default AppHeader;
