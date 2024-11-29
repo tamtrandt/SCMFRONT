@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, Button, Table, InputNumber, message, Popconfirm } from 'antd';
 import { DeleteOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import { CartItem } from '@/components/utils/interfaces';
+import { buyTokens } from '@/api/product';
 
 interface CartModalProps {
     visible: boolean;
@@ -77,13 +78,30 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
         message.success('Cart has been cleared!');
     };
 
-    // Xử lý hành động mua hàng
-    const handleBuy = () => {
-        message.success('Purchase successful!');
-        // Thực hiện các hành động khác như gửi dữ liệu thanh toán hoặc đặt hàng
-        localStorage.removeItem('cart'); // Xóa giỏ hàng sau khi mua
-        setCartData([]);
-        setTotalPrice(0);
+    const handleBuy = async () => {
+        if (cartData.length === 0) {
+            message.error('Your cart is empty!');
+            return;
+        }
+
+        // Chuẩn bị dữ liệu từ giỏ hàng
+        const tokenIds = cartData.map(item => item.id);  // ID các token cần mua
+        const amounts = cartData.map(item => item.quantity);  // Số lượng mỗi token cần mua
+        const totalPrice = (cartData.reduce((sum, item) => sum + item.price * item.quantity, 0)).toString();  // Tổng giá trị giỏ hàng
+
+        try {
+            // Gọi API mua token
+            await buyTokens(tokenIds, amounts, totalPrice);  // Gọi API với thông tin từ giỏ hàng
+
+            // Sau khi giao dịch thành công
+            message.success('Purchase successful!');
+            localStorage.removeItem('cart');  // Xóa giỏ hàng
+            setCartData([]);  // Cập nhật lại giỏ hàng
+            setTotalPrice(0);  // Cập nhật lại tổng giá trị
+        } catch (error) {
+            console.error('Error during purchase:', error);
+            message.error('Purchase failed. Please try again.');
+        }
     };
 
     // Cột trong bảng

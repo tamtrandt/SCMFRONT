@@ -178,6 +178,25 @@ export const deleteProduct = async (id: number) => {
 
 
 
+export const buyTokens = async (tokenIds: number[], amounts: number[], totalPrice: string) => {
+  const payload = {
+    tokenIds,
+    amounts,
+    totalPrice,
+  };
+
+  try {
+    const response = await fetchAPI('/products/buy', {
+      method: 'POST',
+      body: payload,
+    });
+    return response;  // Trả về dữ liệu từ API
+  } catch (error) {
+    console.error('Error buying tokens:', error);
+    throw error;
+  }
+};
+
 
 
 
