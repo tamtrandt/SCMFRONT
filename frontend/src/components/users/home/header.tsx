@@ -17,39 +17,39 @@ import { AdminContext } from '@/components/admin/dashboard/animation';
 const AppHeader = () => {
     const { Header } = Layout;
     const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
-    const router = useRouter(); // Hook để điều hướng trang
+    const router = useRouter();
 
-    const [username, setUsername] = useState(); // Khởi tạo với giá trị mặc định
+    const [username, setUsername] = useState();
 
     useEffect(() => {
-        const userInfo = localStorage.getItem('user_data'); // Lấy thông tin người dùng từ localStorage
+        const userInfo = localStorage.getItem('user_data');
         if (userInfo) {
-            const parsedUserInfo = JSON.parse(userInfo); // Parse chuỗi JSON thành object
+            const parsedUserInfo = JSON.parse(userInfo);
             if (parsedUserInfo.email) {
-                // Tách tên người dùng từ email
+
                 const emailParts = parsedUserInfo.email.split('@');
                 if (emailParts.length > 0) {
-                    setUsername(emailParts[0]); // Cập nhật tên người dùng (phần trước @)
+                    setUsername(emailParts[0]);
                 }
             }
         }
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('user_data');// Xóa thông tin người dùng khỏi cookies
-        Cookies.remove('access_token'); // Xóa access token khỏi cookies (nếu bạn lưu ở đây)
+        localStorage.removeItem('user_data');
+        Cookies.remove('access_token');
 
-        router.push('/auth/login'); // Chuyển hướng đến trang đăng nhập
-        message.success("Logout successful!"); // Hiển thị thông báo
+        router.push('/auth/login');
+        message.success("Logout successful!");
     };
 
     const items: MenuProps['items'] = [
         {
             key: '1',
             label: (
-                <Link href="/home/profile"> {/* Đường dẫn đến trang ProfilePage */}
+                <Link href="/home/profile">
                     <span>
-                        <UserOutlined style={{ marginRight: 8 }} /> {/* Icon cho Profile */}
+                        <UserOutlined style={{ marginRight: 8 }} />
                         Profile
                     </span>
                 </Link>
@@ -60,11 +60,11 @@ const AppHeader = () => {
             danger: true,
             label: (
                 <span>
-                    <PoweroffOutlined style={{ marginRight: 8 }} /> {/* Icon cho Logout */}
+                    <PoweroffOutlined style={{ marginRight: 8 }} />
                     Logout
                 </span>
             ),
-            onClick: handleLogout, // Thêm hàm gọi khi nhấn
+            onClick: handleLogout,
         },
     ];
 
@@ -94,7 +94,7 @@ const AppHeader = () => {
                         style={{ color: "unset", lineHeight: "0 !important", marginRight: 20 }}
                     >
                         <Space>
-                            Welcome {username} {/* Hiển thị tên người dùng */}
+                            Welcome {username}
                             <DownOutlined />
                         </Space>
                     </a>

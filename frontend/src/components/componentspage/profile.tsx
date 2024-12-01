@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
-import { message } from "antd"; // Import message từ Ant Design để thông báo
-import { useRouter } from "next/navigation"; // Sử dụng useRouter từ next/navigation
+import { message } from "antd";
+import { useRouter } from "next/navigation";
 import { Modal } from "antd";
 import Cookies from "js-cookie";
 import { ProfileData } from "@/components/utils/interfaces";

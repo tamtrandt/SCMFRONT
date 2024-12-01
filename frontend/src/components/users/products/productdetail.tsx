@@ -1,31 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
-import { deleteProduct, getProductOnChain } from '@/api/product';
+import { getProductOnChain } from '@/api/product';
 import { ProductOffChainCard } from '@/components/admin/products/productoffchain';
 import FormatAndCopyHash from '@/components/componentspage/hash';
 import { ImageDisplay } from '@/components/componentspage/image';
-import { DeleteOutlined, EditOutlined, HistoryOutlined, ShoppingCartOutlined, SyncOutlined } from '@ant-design/icons';
-import { Button, Card, Col, message, Modal, notification, Row, Spin } from 'antd';
+import { HistoryOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { Button, Card, Col, message, Row, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 
 
 
 interface ProductOnChainCardProps {
     id: number;
-    onDeleteSuccess: (tokenId: number) => void;
 }
-export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteSuccess }) => {
+export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id }) => {
     const [product, setProduct] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [viewOnChain, setViewOnChain] = useState<boolean>(true); // Điều khiển trạng thái On/Off chain
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-    const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-    const [visible, setVisible] = useState(false); // For OffChain modal
+    const [visible, setVisible] = useState(false);
 
-    // Fetch product details from API
-    // Định nghĩa fetchProduct ở ngoài useEffect
     const fetchProduct = useCallback(async () => {
         if (!id) {
             setError('Product ID is required.');
@@ -34,7 +28,7 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
         }
 
         try {
-            setLoading(true); // Đảm bảo loading được set đúng trạng thái
+            setLoading(true);
             const data = await getProductOnChain(id);
             setProduct({
                 id: data.id,
@@ -56,35 +50,28 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
         } finally {
             setLoading(false);
         }
-    }, [id]); // Phụ thuộc vào id
+    }, [id]);
 
-    // Gọi fetchProduct trong useEffect khi id thay đổi
     useEffect(() => {
         fetchProduct();
     }, [fetchProduct]);
 
 
     if (loading) {
-        return <Spin size="large" />; // Hiển thị loading
+        return <Spin size="large" />;
     }
 
     if (error) {
-        return <div>{error}</div>; // Hiển thị thông báo lỗi
+        return <div>{error}</div>;
     }
 
-
-
-    // Xử lý khi bấm vào nút Sync Data (hiện giờ là nút mở modal OffChain)
     const handleOpenOffChainModal = () => {
-        setVisible(true); // Mở modal OffChain
+        setVisible(true);
     };
 
     const handleClose = () => {
-        setVisible(false); // Đóng modal
+        setVisible(false);
     };
-
-
-
 
     const handleCart = (
         productId: number,
@@ -92,34 +79,28 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
         price: number,
         availableQuantity: number
     ) => {
-        // Lấy danh sách giỏ hàng hiện tại từ localStorage
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 
-        // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
+        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
         const productIndex = cart.findIndex((item: { id: number }) => item.id === productId);
 
         if (productIndex === -1) {
-            // Nếu chưa tồn tại, thêm sản phẩm mới vào giỏ hàng
             cart.push({
                 id: productId,
                 name,
                 price,
-                quantity: 1, // Thêm với số lượng ban đầu là 1
-                availableQuantity, // Lưu số lượng tồn kho để kiểm tra sau
+                quantity: 1,
+                availableQuantity,
             });
             message.success('Product added to cart!');
         } else {
-            // Nếu đã tồn tại, kiểm tra số lượng
             const existingProduct = cart[productIndex];
             if (existingProduct.quantity < existingProduct.availableQuantity) {
-                existingProduct.quantity += 1; // Tăng số lượng thêm 1
+                existingProduct.quantity += 1;
                 message.info('Product quantity updated!');
             } else {
                 message.warning('Cannot add more than available quantity!');
             }
         }
-
-        // Cập nhật lại giỏ hàng trong localStorage
         localStorage.setItem('cart', JSON.stringify(cart));
     };
 
@@ -130,7 +111,7 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
             <Card
                 bordered={false}
                 style={{
-                    height: '555px', // Có thể điều chỉnh chiều cao cố định nếu cần
+                    height: '555px',
                     width: '300px',
                     padding: '5px',
                     border: '3px solid black',
@@ -141,14 +122,13 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
                 }}
             >
                 <div style={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
-                    {/* Nút Sync Data bên trái */}
                     <Button
-                        onClick={handleOpenOffChainModal} // Mở modal OffChain khi click
+                        onClick={handleOpenOffChainModal}
                         style={{
-                            backgroundColor: '#faad14', // Màu sắc của nút
+                            backgroundColor: '#faad14',
                             color: '#fff',
-                            width: '150px', // Đặt cùng chiều rộng
-                            height: '40px', // Đặt cùng chiều cao
+                            width: '150px',
+                            height: '40px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -157,22 +137,20 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
                         Transactions <HistoryOutlined />
                     </Button>
 
-                    {/* Hiển thị ProductOffChainCard khi nút được click */}
                     <ProductOffChainCard
                         id={product.id}
-                        visible={visible} // Điều khiển mở/đóng modal OffChain
-                        onClose={handleClose} // Đóng modal khi người dùng bấm vào Close
+                        visible={visible}
+                        onClose={handleClose}
                     />
 
-                    {/* Nút Cart Shopping bên phải */}
                     <Button
                         type="default"
                         onClick={() => handleCart(product.id, product.name, product.price, product.quantity)}
                         style={{
                             backgroundColor: '#28a745',
                             color: '#fff',
-                            width: '150px', // Đặt cùng chiều rộng
-                            height: '40px', // Đặt cùng chiều cao
+                            width: '150px',
+                            height: '40px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -182,8 +160,6 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id, onDeleteS
                     </Button>
                 </div>
 
-
-                {/* Nội dung hiển thị trong card */}
                 <ImageDisplay imagecids={product.imagecids} />
                 <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
                     <strong>Creator:</strong>

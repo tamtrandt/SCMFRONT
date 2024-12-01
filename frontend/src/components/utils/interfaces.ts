@@ -93,5 +93,5 @@ export interface CartItem {
     name: string;
     price: number;
     quantity: number;
-    availableQuantity: number; // Số lượng tồn kho
+    availableQuantity: number; 
 }

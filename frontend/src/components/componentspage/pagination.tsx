@@ -26,7 +26,7 @@ export const PaginationComponent = ({ products, pageSize, onPageChange }: Pagina
         const pageNumber = Number(inputPage);
         if (pageNumber > 0 && pageNumber <= totalPages) {
             handlePageChange(pageNumber);
-            setInputPage(''); // Reset input
+            setInputPage('');
         } else {
             message.error(`Please enter a valid page number between 1 and ${totalPages}`);
         }

@@ -2,41 +2,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { useEffect, useState } from 'react';
-import { Button, Col, notification, Row, Spin } from 'antd';
+import { Button, Col, Input, notification, Row, Select, Spin } from 'antd';
 import { getAllProductOnChain, getProductOnChain } from '@/api/product';
 import { PaginationComponent } from '@/components/componentspage/pagination';
-import { ProductOnChainCard } from '@/components/admin/products/productonchain';
 import { ProductDetail } from './productdetail';
 
 
 
 const ProductList = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [products, setProducts] = useState<any[]>([]); // Danh sách sản phẩm
+    const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [paginatedProducts, setPaginatedProducts] = useState<any[]>([]); // Sản phẩm hiển thị theo trang
+    const [paginatedProducts, setPaginatedProducts] = useState<any[]>([]);
 
-    // Mở Modal
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
-
-    // Đóng Modal
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
-    const handleTokenIdDelete = (tokenId: number) => {
-        // Xóa sản phẩm khỏi danh sách products
-        setProducts((prevProducts) => prevProducts.filter((product) => product.id !== tokenId));
-
-        // Cập nhật lại paginatedProducts
-        setPaginatedProducts((prevProducts) => prevProducts.filter((product) => product.id !== tokenId));
-    };
-
-
-
-
-    // Hàm fetch tất cả sản phẩm từ on-chain
     const fetchProducts = async () => {
         setLoading(true);
         try {
@@ -48,8 +25,8 @@ const ProductList = () => {
                         return product;
                     })
                 );
-                setProducts(productDetails); // Lưu danh sách sản phẩm chi tiết
-                setPaginatedProducts(productDetails.slice(0, 4)); // Mặc định hiển thị 4 sản phẩm
+                setProducts(productDetails);
+                setPaginatedProducts(productDetails.slice(0, 4));
             } else {
                 setProducts([]);
                 setPaginatedProducts([]);
@@ -64,15 +41,34 @@ const ProductList = () => {
         }
     };
 
-    // Lấy lại danh sách sản phẩm khi component load
     useEffect(() => {
         fetchProducts();
     }, []);
 
-    // Hàm phân trang
+
     const handlePageChange = (paginatedProducts: any[]) => {
         setPaginatedProducts(paginatedProducts);
     };
+
+
+    const handleSearch = () => {
+        const filtered = products.filter((product) =>
+            product.name.toLowerCase().includes()
+        );
+        setPaginatedProducts(filtered);
+    };
+
+
+    const handleFilter = () => {
+        const filtered = products.filter((product) => product.category);
+        setPaginatedProducts(filtered);
+    };
+    const handleSort = () => {
+
+    };
+    const { Search } = Input;
+    const { Option } = Select;
+
 
     return (
         <>
@@ -87,6 +83,42 @@ const ProductList = () => {
                 <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>Marketplace</span>
             </div>
 
+            {/* Search, Filter, and Sort */}
+            <div style={{ display: 'flex', marginBottom: 20, gap: 10 }}>
+                {/* Search */}
+                <Search
+                    placeholder="Search products"
+                    allowClear
+                    onSearch={(value: any) => handleSearch()}
+                    style={{ flex: 2 }}
+                />
+
+                {/* Filter */}
+                <Select
+                    placeholder="Filter by category"
+                    allowClear
+                    onChange={(value) => handleFilter()}
+                    style={{ flex: 1 }}
+                >
+                    <Option value="electronics">Electronics</Option>
+                    <Option value="fashion">Fashion</Option>
+                    <Option value="home-appliances">Home Appliances</Option>
+                </Select>
+
+                {/* Sort */}
+                <Select
+                    placeholder="Sort by"
+                    allowClear
+                    onChange={(value) => handleSort()}
+                    style={{ flex: 1 }}
+                >
+                    <Option value="price-asc">Price: Low to High</Option>
+                    <Option value="price-desc">Price: High to Low</Option>
+                    <Option value="name-asc">Name: A-Z</Option>
+                    <Option value="name-desc">Name: Z-A</Option>
+                </Select>
+            </div>
+
             {loading ? (
                 <Spin size="large" />
             ) : (
@@ -98,25 +130,23 @@ const ProductList = () => {
                             <Row gutter={[24, 24]}>
                                 {paginatedProducts.map((product) => (
                                     <Col span={6} key={product.id}>
-                                        {/* Hiển thị từng sản phẩm */}
-                                        <ProductDetail id={product.id} onDeleteSuccess={handleTokenIdDelete} />
+
+                                        <ProductDetail id={product.id} />
                                     </Col>
                                 ))}
                             </Row>
-                            {/* Component phân trang */}
+
                             <PaginationComponent
                                 products={products}
-                                pageSize={4} // Mỗi trang sẽ hiển thị 4 sản phẩm
+                                pageSize={4}
                                 onPageChange={handlePageChange}
                             />
                         </>
                     )}
                 </div>
             )}
-
-
         </>
     );
-};
+}
 
 export default ProductList;

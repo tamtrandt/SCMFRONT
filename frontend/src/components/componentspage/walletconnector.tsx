@@ -1,9 +1,12 @@
+/* eslint-disable react/jsx-no-undef */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { BrowserProvider, JsonRpcProvider, Wallet, Signer } from 'ethers';
-import { Button, TextField, Typography, Box, Alert } from '@mui/material';
+import { Button, TextField, Typography, Box, Alert, Avatar } from '@mui/material';
 import { sendWalletAddressToBackend } from '@/api/wallet';
+import MetaMaskIcon from '@/public/images/Metalogo.png';
+import Image from 'next/image';
 
 
 interface WalletConnectorProps {
@@ -100,11 +103,14 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ onConnect }) => {
                 padding: '2rem',
                 textAlign: 'center',
                 border: '1px solid #ccc',
-                borderRadius: '8px',
-                backgroundColor: '#f9f9f9',
+                borderRadius: '12px',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
             }}
         >
-            <Typography variant="h4" gutterBottom>
+
+
+            <Typography variant="h5" sx={{ fontWeight: 'bold', marginBottom: '1rem' }}>
                 Connect Wallet
             </Typography>
 
@@ -120,12 +126,24 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ onConnect }) => {
                         variant="contained"
                         fullWidth
                         onClick={connectWithMetaMask}
-                        sx={{ marginBottom: '1rem' }}
+                        sx={{
+                            marginBottom: '1rem',
+                            backgroundColor: '#f6851b',
+                            color: '#ffffff',
+                            '&:hover': {
+                                backgroundColor: '#e2761b',
+                            },
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '0.5rem',
+                        }}
                     >
+                        <Image src={MetaMaskIcon} alt="MetaMask Icon" width={20} height={20} />
                         Connect with MetaMask
                     </Button>
 
-                    <Typography variant="body1" gutterBottom>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
                         OR
                     </Typography>
 
@@ -135,23 +153,47 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ onConnect }) => {
                         fullWidth
                         value={privateKey}
                         onChange={(e) => setPrivateKey(e.target.value)}
-                        sx={{ marginBottom: '1rem' }}
+                        sx={{
+                            marginBottom: '1rem',
+                            '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                            },
+                        }}
                     />
 
-                    <Button variant="contained" fullWidth onClick={connectWithPrivateKey}>
+                    <Button
+                        variant="contained"
+                        fullWidth
+                        onClick={connectWithPrivateKey}
+                        sx={{
+                            backgroundColor: '#0070f3',
+                            color: '#ffffff',
+                            '&:hover': {
+                                backgroundColor: '#005bb5',
+                            },
+                        }}
+                    >
                         Connect with Private Key
                     </Button>
                 </>
             ) : (
                 <Box sx={{ marginTop: '1rem', textAlign: 'center' }}>
-                    <Typography variant="h6">Wallet Connected</Typography>
-                    <Typography variant="body1">Address: {address}</Typography>
-                    <Typography variant="body1">Balance: {balance} ETH</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                        Wallet Connected
+                    </Typography>
+                    <Typography variant="body2" sx={{ marginTop: '0.5rem' }}>
+                        <strong>Address:</strong> {address}
+                    </Typography>
+                    <Typography variant="body2" sx={{ marginBottom: '1rem' }}>
+                        <strong>Balance:</strong> {balance} ETH
+                    </Typography>
                     <Button
                         variant="outlined"
-                        color="secondary"
+                        color="error"
                         onClick={disconnectWallet}
-                        sx={{ marginTop: '1rem' }}
+                        sx={{
+                            borderRadius: '8px',
+                        }}
                     >
                         Disconnect Wallet
                     </Button>
@@ -159,6 +201,6 @@ const WalletConnector: React.FC<WalletConnectorProps> = ({ onConnect }) => {
             )}
         </Box>
     );
-};
+}
 
 export default WalletConnector;

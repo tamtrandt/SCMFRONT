@@ -3,12 +3,7 @@ import { fetchAPI } from "./fetch";
 import Cookies from "js-cookie";
 import { Login } from "@/components/utils/interfaces";
 
-
-
-
-
-
-// Đăng ký tài khoản
+// Register user
 export const registerUser = async (values: Login) => {
   return await fetchAPI("/auth/register", {
     method: "POST",
@@ -16,7 +11,7 @@ export const registerUser = async (values: Login) => {
   });
 };
 
-// Xác thực email
+// Verify email
 export const verifyEmail = async (code: string) => {
   return await fetchAPI("/auth/verify", {
     method: "POST",
@@ -24,7 +19,7 @@ export const verifyEmail = async (code: string) => {
   });
 };
 
-// Gửi lại mã xác thực
+// Resend verification code
 export const resendCode = async (email: string) => {
   return await fetchAPI("/auth/resendcode", {
     method: "POST",
@@ -32,33 +27,22 @@ export const resendCode = async (email: string) => {
   });
 };
 
-// Đăng nhập và lưu token vào cookies
-
+// Login user and store token in cookies
 export const loginUser = async (values: Login) => {
-   
-    const data = await fetchAPI("/auth/login", {
-        method: "POST",
-        body: values,
-    });
-    const userObject = data.user;
-    
+  const data = await fetchAPI("/auth/login", {
+    method: "POST",
+    body: values,
+  });
 
-    // Lưu token vào cookies
-    Cookies.set("access_token", data.access_token, {
-        // httpOnly: true,
-        // secure: true,
-        // sameSite: "Strict",
-        path: "/",
-        expires: 24 
-    });
+  const userObject = data.user;
 
-     localStorage.setItem("user_data", JSON.stringify(userObject));
+  // Store token in cookies and user data in local storage
+  Cookies.set("access_token", data.access_token, {
+    path: "/",
+    expires: 24, // Expiry in hours
+  });
 
-    
-    return data;
-   
+  localStorage.setItem("user_data", JSON.stringify(userObject));
 
+  return data;
 };
-
-
-

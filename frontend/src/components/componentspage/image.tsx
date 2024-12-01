@@ -26,7 +26,7 @@ export const ImageDisplay = ({ imagecids }: ImageDisplayProps) => {
     const hasImages = imagecids && imagecids.length > 0;
     const currentImageUrl = hasImages
         ? imagecids[currentIndex].replace('ipfs://', 'https://ipfs.io/ipfs/')
-        : (typeof NoImage === 'string' ? NoImage : NoImage.src);; // Đường dẫn ảnh mặc định nếu không có imageCIDs
+        : (typeof NoImage === 'string' ? NoImage : NoImage.src);;
 
     return (
         <div style={{ textAlign: 'center', marginBottom: 10, position: 'relative' }}>
@@ -48,9 +48,9 @@ export const ImageDisplay = ({ imagecids }: ImageDisplayProps) => {
                 }}
                 icon={<DoubleLeftOutlined />}
             />
-            {/* Sử dụng điều kiện để hiển thị ảnh */}
+
             <img
-                src={currentImageUrl} // Hiển thị ảnh từ CID hoặc ảnh mặc định
+                src={currentImageUrl}
                 alt={hasImages ? `Image ${currentIndex + 1}` : 'Default Image'}
                 style={{ width: 200, height: 200, marginBottom: 10 }}
             />

@@ -3,13 +3,13 @@
 
 import { Button, message } from "antd";
 import { useRouter } from "next/navigation";
-import Cookies from 'js-cookie'; // Đảm bảo đã import thư viện js-cookie
+import Cookies from 'js-cookie';
 
 const Profile = () => {
     const router = useRouter();
 
     const onLogout = () => {
-        // Xóa access token và thông tin người dùng khỏi cookies
+
         Cookies.remove("access_token");
         Cookies.remove("userInfo");
         router.push("/auth/login");
@@ -17,13 +17,13 @@ const Profile = () => {
 
     const onDeleteAccount = async () => {
         try {
-            // Lấy access token từ cookies
+
             const accessToken = Cookies.get("access_token");
 
             const res = await fetch("http://localhost:5000/users/me", {
                 method: "DELETE",
                 headers: {
-                    "Authorization": `Bearer ${accessToken}`, // Sử dụng access token từ cookies
+                    "Authorization": `Bearer ${accessToken}`,
                 },
             });
 

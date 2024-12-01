@@ -4,51 +4,42 @@ import { fetchAPI } from "./fetch";
 import { jwtDecode } from "jwt-decode";
 import Cookies from "js-cookie";
 
-
-
+// Create a new user
 export const createUser = async (userData: any) => {
   try {
-      const response = await fetchAPI('/users/create', {
-          method: 'POST',
-          body: userData,
-      });
-      return response; // Trả về dữ liệu phản hồi từ server
+    const response = await fetchAPI('/users/create', {
+      method: 'POST',
+      body: userData,
+    });
+    return response;
   } catch (error) {
-      // Ném lại lỗi với thông điệp từ server
-      if (error instanceof Error) {
-          throw new Error(error.message); // Ném thông điệp lỗi
-      }
-      throw new Error('Failed to create user'); // Thông báo lỗi mặc định
+    throw new Error(error instanceof Error ? error.message : 'Failed to create user');
   }
 };
 
-
-// Hàm gọi API để lấy tất cả người dùng
+// Get all users
 export const getAllUsers = async () => {
   try {
     const data = await fetchAPI('/users', {
       method: 'GET',
     });
-
-    return data; // Trả về dữ liệu sau khi thành công
+    return data;
   } catch (error) {
     console.error('Error fetching users:', error);
-    throw error; // Ném lỗi ra để frontend có thể xử lý
+    throw error;
   }
 };
 
-
+// Get the user's profile
 export const getProfile = async () => {
   const token = Cookies.get("access_token");
   if (!token) {
-    throw new Error("Token không tồn tại");
+    throw new Error("Token not found");
   }
 
-  // Giải mã token để lấy thông tin người dùng
-  const decodedToken = jwtDecode<{ sub: string }>(token); // Giả định rằng 'sub' là id người dùng
+  const decodedToken = jwtDecode<{ sub: string }>(token);  // Decode the token to get user id
   const userId = decodedToken.sub;
 
-  // Gọi API với userId
   return await fetchAPI(`/users/${userId}`, {
     method: "GET",
     headers: {
@@ -57,11 +48,11 @@ export const getProfile = async () => {
   });
 };
 
-// Cập nhật thông tin người dùng
+// Update user information
 export const updateUser = async (id: string, updateUserDto: any) => {
   const token = Cookies.get("access_token");
   if (!token) {
-    throw new Error("Token không tồn tại");
+    throw new Error("Token not found");
   }
 
   return await fetchAPI(`/users/${id}`, {
@@ -73,11 +64,11 @@ export const updateUser = async (id: string, updateUserDto: any) => {
   });
 };
 
-// Xóa tài khoản người dùng
+// Delete user account
 export const deleteUser = async (id: string) => {
   const token = Cookies.get("access_token");
   if (!token) {
-    throw new Error("Token không tồn tại");
+    throw new Error("Token not found");
   }
 
   return await fetchAPI(`/users/${id}`, {

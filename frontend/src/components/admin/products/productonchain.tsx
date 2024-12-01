@@ -1,31 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
+
 import { deleteProduct, getProductOnChain } from '@/api/product';
 import FormatAndCopyHash from '@/components/componentspage/hash';
 import { ImageDisplay } from '@/components/componentspage/image';
-import { DeleteOutlined, EditOutlined, SyncOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Modal, notification, Row, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { UpdateModal } from './updatemodal';
 import { ProductOffChainCard } from './productoffchain';
 
-
 interface ProductOnChainCardProps {
     id: number;
     onDeleteSuccess: (tokenId: number) => void;
 }
+
 export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDeleteSuccess }) => {
     const [product, setProduct] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [viewOnChain, setViewOnChain] = useState<boolean>(true); // Điều khiển trạng thái On/Off chain
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [isEditModalVisible, setIsEditModalVisible] = useState<boolean>(false);
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-    const [visible, setVisible] = useState(false); // For OffChain modal
+    const [viewOnChain, setViewOnChain] = useState<boolean>(true); // Control On/Off chain
+    const [visible, setVisible] = useState<boolean>(false); // For OffChain modal
 
-    // Fetch product details from API
-    // Định nghĩa fetchProduct ở ngoài useEffect
+    // Fetch product details
     const fetchProduct = useCallback(async () => {
         if (!id) {
             setError('Product ID is required.');
@@ -34,21 +34,10 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
         }
 
         try {
-            setLoading(true); // Đảm bảo loading được set đúng trạng thái
+            setLoading(true);
             const data = await getProductOnChain(id);
             setProduct({
-                id: data.id,
-                name: data.name,
-                description: data.description,
-                price: data.price,
-                quantity: data.quantity,
-                brand: data.brand,
-                category: data.category,
-                size: data.size,
-                status: data.status,
-                imagecids: data.imagecids,
-                filecids: data.filecids,
-                creater: data.creater,
+                ...data, // Spread data directly instead of assigning properties manually
             });
         } catch (error) {
             setError('Failed to fetch product details.');
@@ -56,51 +45,38 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
         } finally {
             setLoading(false);
         }
-    }, [id]); // Phụ thuộc vào id
+    }, [id]);
 
-    // Gọi fetchProduct trong useEffect khi id thay đổi
     useEffect(() => {
         fetchProduct();
     }, [fetchProduct]);
 
     const handleUpdateSuccess = () => {
-        fetchProduct(); // Hàm fetch lại data sau khi update thành công
+        fetchProduct(); // Refetch after update
     };
-
-    if (loading) {
-        return <Spin size="large" />; // Hiển thị loading
-    }
-
-    if (error) {
-        return <div>{error}</div>; // Hiển thị thông báo lỗi
-    }
-
 
     const handleDelete = (id: number) => {
         Modal.confirm({
-            title: 'Xác nhận xóa sản phẩm',
-            content: 'Bạn có chắc chắn muốn xóa sản phẩm này?',
-            okText: 'Có',
+            title: 'Confirm Product Deletion',
+            content: 'Are you sure you want to delete this product?',
+            okText: 'Yes',
             okType: 'danger',
-            cancelText: 'Không',
+            cancelText: 'No',
             onOk: async () => {
                 try {
                     const result = await deleteProduct(id);
-                    onDeleteSuccess(id); // Truyền id của sản phẩm đã xóa
+                    onDeleteSuccess(id);
                     notification.success({
-                        message: 'Xóa sản phẩm thành công',
+                        message: 'Product Deleted Successfully',
                         description: result.message,
                     });
                 } catch (error) {
-                    console.error('Lỗi khi xóa sản phẩm:', error);
+                    console.error('Error deleting product:', error);
                     notification.error({
-                        message: 'Lỗi khi xóa sản phẩm',
-                        description: 'Đã xảy ra lỗi khi xóa sản phẩm.',
+                        message: 'Error Deleting Product',
+                        description: 'An error occurred while deleting the product.',
                     });
                 }
-            },
-            onCancel() {
-                console.log('Đã hủy xóa sản phẩm');
             },
         });
     };
@@ -110,22 +86,28 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
         setIsEditModalVisible(true);
     };
 
-
-    // Xử lý khi bấm vào nút Sync Data (hiện giờ là nút mở modal OffChain)
     const handleOpenOffChainModal = () => {
-        setVisible(true); // Mở modal OffChain
+        setVisible(true); // Open OffChain modal
     };
 
-    const handleClose = () => {
-        setVisible(false); // Đóng modal
+    const handleCloseOffChainModal = () => {
+        setVisible(false); // Close OffChain modal
     };
+
+    if (loading) {
+        return <Spin size="large" />;
+    }
+
+    if (error) {
+        return <div>{error}</div>;
+    }
 
     return (
         <>
             <Card
                 bordered={false}
                 style={{
-                    height: '555px', // Có thể điều chỉnh chiều cao cố định nếu cần
+                    height: '555px',
                     width: '300px',
                     padding: '5px',
                     border: '3px solid black',
@@ -136,26 +118,25 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
                 }}
             >
                 <div style={{ display: 'flex', marginBottom: '10px', alignItems: 'center' }}>
-                    {/* Nút Sync Data bên trái */}
-                    {/* Nút thông thường để mở modal OffChain */}
+                    {/* Button to view off-chain data */}
                     <Button
-                        onClick={handleOpenOffChainModal} // Mở modal OffChain khi click
+                        onClick={handleOpenOffChainModal}
                         style={{
-                            backgroundColor: '#faad14', // Màu sắc của nút
+                            backgroundColor: '#faad14',
                             color: '#fff',
                         }}
                     >
-                        Xem Off-Chain
+                        View Off-Chain
                     </Button>
 
-                    {/* Hiển thị ProductOffChainCard khi nút được click */}
+                    {/* Off-Chain Card modal */}
                     <ProductOffChainCard
                         id={product.id}
-                        visible={visible} // Điều khiển mở/đóng modal OffChain
-                        onClose={handleClose} // Đóng modal khi người dùng bấm vào Close
+                        visible={visible}
+                        onClose={handleCloseOffChainModal}
                     />
 
-                    {/* Container cho các nút Edit và Delete bên phải */}
+                    {/* Edit and Delete buttons */}
                     <Button type="primary" onClick={() => handleEdit(product.id)}>
                         <EditOutlined />
                     </Button>
@@ -164,7 +145,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
                     </Button>
                 </div>
 
-                {/* Nội dung hiển thị trong card */}
+                {/* Product display */}
                 <ImageDisplay imagecids={product.imagecids} />
                 <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
                     <strong>Creator:</strong>

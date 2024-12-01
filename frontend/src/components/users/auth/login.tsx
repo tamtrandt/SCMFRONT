@@ -7,9 +7,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { loginUser } from '@/api/auth';
-import Cookies from "js-cookie";
 
 
 const Login = () => {
@@ -18,28 +16,22 @@ const Login = () => {
     const router = useRouter();
     const onFinish = async (values: { email: string; password: string }) => {
         try {
-            // Gọi hàm loginUser từ auth.ts
+
             const data = await loginUser(values);
             console.log(data);
-
-            // Lưu user vào localStorage (nếu chưa thực hiện trong loginUser)
-            //localStorage.setItem("user_data", JSON.stringify(data.user));
-
-            // Lấy dữ liệu người dùng từ localStorage
             const userDataString = localStorage.getItem("user_data");
             let userData;
 
             if (userDataString) {
-                userData = JSON.parse(userDataString); // Chuyển đổi chuỗi JSON thành đối tượng
+                userData = JSON.parse(userDataString);
             }
 
-            // Kiểm tra trạng thái tài khoản
+
             if (!userData.isactive) {
-                message.error("Account is not active."); // Hiển thị thông báo nếu tài khoản không hoạt động
-                return; // Dừng việc thực hiện nếu tài khoản không hoạt động
+                message.error("Account is not active.");
+                return;
             }
 
-            // Điều hướng dựa trên role nếu tài khoản đang hoạt động
             if (userData.role === "admin") {
                 router.push("/dashboard");
             } else {
@@ -50,11 +42,6 @@ const Login = () => {
             message.error(error.message || "Login failed. Please try again.");
         }
     };
-
-
-
-
-
 
     return (
 
@@ -160,8 +147,6 @@ const Login = () => {
             </Col>
         </Row>
     )
-
-
 
 }
 

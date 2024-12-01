@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useContext, useState } from 'react';
@@ -7,6 +6,7 @@ import Menu from "antd/es/menu";
 import {
     DashboardOutlined,
     FolderOpenOutlined,
+    PartitionOutlined,
     ProductOutlined,
     RocketOutlined,
     TeamOutlined,
@@ -47,6 +47,11 @@ const AdminSideBar: React.FC = () => {
                     icon: <TeamOutlined />,
                 },
                 {
+                    key: "collection",
+                    label: <Link href={"/dashboard/users"}>Manage Collection</Link>,
+                    icon: <PartitionOutlined />,
+                },
+                {
                     key: "products",
                     label: 'Manage Products',
                     icon: <ProductOutlined />,
@@ -58,7 +63,7 @@ const AdminSideBar: React.FC = () => {
                         },
                         {
                             key: "releasing",
-                            label: <Link href={""}>Releasing</Link>,
+                            label: <Link href={"/dashboard/releasing"}>Releasing</Link>,
                             icon: <RocketOutlined />,
                         },
                     ],

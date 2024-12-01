@@ -1,54 +1,33 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
+
 import { useEffect, useState } from 'react';
-import { Button, Col, notification, Row, Spin } from 'antd';
-import { GetProductOnChain } from '@/components/utils/interfaces';
+import { Button, Col, Input, notification, Row, Select, Spin } from 'antd';
 import { getAllProductOnChain, getProductOnChain } from '@/api/product';
 import ProductForm from './productmodal';
 import { ProductOnChainCard } from './productonchain';
 import { PaginationComponent } from '@/components/componentspage/pagination';
 
-
-
 const ProductTable = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [products, setProducts] = useState<any[]>([]); // Danh sách sản phẩm
+    const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [paginatedProducts, setPaginatedProducts] = useState<any[]>([]); // Sản phẩm hiển thị theo trang
+    const [paginatedProducts, setPaginatedProducts] = useState<any[]>([]);
 
-    // Mở Modal
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
+    const showModal = () => setIsModalOpen(true);
+    const handleCancel = () => setIsModalOpen(false);
 
-    // Đóng Modal
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
     const handleTokenIdDelete = (tokenId: number) => {
-        // Xóa sản phẩm khỏi danh sách products
         setProducts((prevProducts) => prevProducts.filter((product) => product.id !== tokenId));
-
-        // Cập nhật lại paginatedProducts
         setPaginatedProducts((prevProducts) => prevProducts.filter((product) => product.id !== tokenId));
     };
 
-
-    // Hàm xử lý khi tạo sản phẩm thành công
     const handleProductCreated = async (tokenId: number) => {
         try {
-            // Fetch thông tin chi tiết của sản phẩm mới tạo từ tokenId
             const newProduct = await getProductOnChain(tokenId);
-
-            // Cập nhật danh sách sản phẩm (không fetch lại tất cả)
             setProducts((prevProducts) => [...prevProducts, newProduct]);
-
-            // Cập nhật danh sách phân trang
-            setPaginatedProducts((prevProducts) => {
-                const updatedProducts = [...prevProducts, newProduct];
-                return updatedProducts.slice(-4); // Hiển thị 4 sản phẩm cuối
-            });
+            setPaginatedProducts((prevProducts) => [...prevProducts, newProduct].slice(-4));
 
             notification.success({
                 message: 'Product Added',
@@ -63,40 +42,34 @@ const ProductTable = () => {
         }
     };
 
-    // Hàm fetch tất cả sản phẩm từ on-chain
     const fetchProducts = async () => {
         setLoading(true);
         try {
             const data = await getAllProductOnChain();
             if (data?.product_ids?.length > 0) {
                 const productDetails = await Promise.all(
-                    data.product_ids.map(async (tokenId: number) => {
-                        const product = await getProductOnChain(tokenId);
-                        return product;
-                    })
+                    data.product_ids.map((tokenId: number) => getProductOnChain(tokenId))
                 );
-                setProducts(productDetails); // Lưu danh sách sản phẩm chi tiết
-                setPaginatedProducts(productDetails.slice(0, 4)); // Mặc định hiển thị 4 sản phẩm
+                setProducts(productDetails);
+                setPaginatedProducts(productDetails.slice(0, 4));
             } else {
                 setProducts([]);
                 setPaginatedProducts([]);
             }
         } catch (error) {
             notification.error({
-                message: 'Lỗi khi tải sản phẩm',
-                description: 'Không thể tải danh sách sản phẩm từ on-chain.',
+                message: 'Error loading products',
+                description: 'Unable to load products from on-chain.',
             });
         } finally {
             setLoading(false);
         }
     };
 
-    // Lấy lại danh sách sản phẩm khi component load
     useEffect(() => {
         fetchProducts();
     }, []);
 
-    // Hàm phân trang
     const handlePageChange = (paginatedProducts: any[]) => {
         setPaginatedProducts(paginatedProducts);
     };
@@ -111,7 +84,24 @@ const ProductTable = () => {
                     marginBottom: 20,
                 }}
             >
-                <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>Manager Products</span>
+                <span style={{ fontSize: '1.2em', fontWeight: 'bold' }}>Manage Products</span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Input.Search placeholder="Search" style={{ width: 200, marginRight: 20 }} />
+                    <Select placeholder="Filter by role and status" style={{ width: 150, marginRight: 20 }}>
+                        <Select.Option value="">All</Select.Option>
+                        <Select.Option value="admin">Admin</Select.Option>
+                        <Select.Option value="customer">Customer</Select.Option>
+                        <Select.Option value="active">Active</Select.Option>
+                        <Select.Option value="not-active">Not Active</Select.Option>
+                    </Select>
+                    <Select placeholder="Sort by" style={{ width: 150, marginRight: 20 }}>
+                        <Select.Option value="">None</Select.Option>
+                        <Select.Option value="abcAsc">Name A-Z</Select.Option>
+                        <Select.Option value="abcDesc">Name Z-A</Select.Option>
+                        <Select.Option value="createdAtAsc">Oldest Created</Select.Option>
+                        <Select.Option value="createdAtDesc">Newest Created</Select.Option>
+                    </Select>
+                </div>
                 <Button onClick={showModal}>New Product</Button>
             </div>
 
@@ -126,15 +116,13 @@ const ProductTable = () => {
                             <Row gutter={[24, 24]}>
                                 {paginatedProducts.map((product) => (
                                     <Col span={6} key={product.id}>
-                                        {/* Hiển thị từng sản phẩm */}
                                         <ProductOnChainCard id={product.id} onDeleteSuccess={handleTokenIdDelete} />
                                     </Col>
                                 ))}
                             </Row>
-                            {/* Component phân trang */}
                             <PaginationComponent
                                 products={products}
-                                pageSize={4} // Mỗi trang sẽ hiển thị 4 sản phẩm
+                                pageSize={4}
                                 onPageChange={handlePageChange}
                             />
                         </>
@@ -142,7 +130,6 @@ const ProductTable = () => {
                 </div>
             )}
 
-            {/* Modal tạo sản phẩm */}
             <ProductForm
                 isOpen={isModalOpen}
                 onClose={handleCancel}

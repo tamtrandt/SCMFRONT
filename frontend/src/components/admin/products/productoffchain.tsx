@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Modal, Table, Spin } from 'antd';
-import { getProductOffChain } from '@/api/product'; // Giả sử bạn đã có API này
+import { getProductOffChain } from '@/api/product';
 import FormatAndCopyHash from '@/components/componentspage/hash';
 
 interface ProductOffChainCardProps {
@@ -17,15 +16,16 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch dữ liệu sản phẩm khi id thay đổi
+    // Fetch product details when id changes
     useEffect(() => {
         const fetchProducts = async () => {
-            if (!id) return; // Nếu không có id thì không làm gì cả
+            if (!id) return;
 
+            setLoading(true);
             try {
-                const data = await getProductOffChain(id); // Lấy dữ liệu từ API
-                setProducts(data); // Lưu mảng sản phẩm vào state
-            } catch (error) {
+                const data = await getProductOffChain(id);
+                setProducts(data);
+            } catch {
                 setError('Failed to fetch product details.');
             } finally {
                 setLoading(false);
@@ -33,23 +33,21 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
         };
 
         fetchProducts();
-    }, [id]); // Chạy lại khi id thay đổi
+    }, [id]);
 
-    // Nếu đang load, hiển thị spin
+    // Show loading spinner while data is being fetched
     if (loading) return <Spin size="large" />;
 
-    // Hiển thị thông báo lỗi nếu có
+    // Show error message if fetching fails
     if (error) return <div>{error}</div>;
 
-    // Cấu hình các cột của bảng
+    // Columns configuration for the table
     const columns = [
         {
             title: 'Transaction Hash',
             dataIndex: 'transactionHash',
             key: 'transactionHash',
-            render: (text: string) => (
-                <FormatAndCopyHash hash={text} /> // Sử dụng FormatAndCopyHash để hiển thị transaction hash
-            ),
+            render: (text: string) => <FormatAndCopyHash hash={text} />,
         },
         {
             title: 'Action',
@@ -60,42 +58,37 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
             title: 'Initiator',
             dataIndex: ['event', 'initiator'],
             key: 'initiator',
-            render: (text: string) => <FormatAndCopyHash hash={text} /> // Sử dụng FormatAndCopyHash cho initiator
+            render: (text: string) => <FormatAndCopyHash hash={text} />,
         },
         {
             title: 'Timestamp',
             dataIndex: ['event', 'timestamp'],
             key: 'timestamp',
-            render: (text: string) =>
-                new Date(text).toLocaleString('en-US', { hour12: false }),
+            render: (text: string) => new Date(text).toLocaleString('en-US', { hour12: false }),
         },
         {
             title: 'Additional Info',
             dataIndex: ['event', 'additionalInfo'],
             key: 'additionalInfo',
-            render: (text: string) => <FormatAndCopyHash hash={text} />
-
+            render: (text: string) => <FormatAndCopyHash hash={text} />,
         },
     ];
 
-    // Chuẩn bị dữ liệu cho bảng
+    // Prepare the data for the table
     const dataSource = products.map((product, index) => ({
         key: index,
         transactionHash: product.transactionHash,
         event: product.event,
-        initiator: product.event.initiator,
-        timestamp: product.event.timestamp,
-        additionalInfo: product.event.additionalInfo,
     }));
 
     return (
         <Modal
             title="Product Off-Chain Details"
-            open={visible} // Điều khiển modal mở hay đóng
-            onCancel={onClose} // Gọi onClose khi đóng modal
+            open={visible}
+            onCancel={onClose}
             footer={null}
             centered
-            width={1000} // Tăng chiều rộng modal để chứa bảng rộng hơn
+            width={1000}
             styles={{
                 body: { padding: '16px 24px', overflow: 'auto' },
             }}
@@ -103,9 +96,9 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
             <Table
                 columns={columns}
                 dataSource={dataSource}
-                pagination={{ pageSize: 5 }} // Số trang mỗi lần hiển thị
-                scroll={{ x: 'max-content' }} // Thêm cuộn ngang để tránh tràn bảng
-                size="middle" // Điều chỉnh kích thước bảng để dễ đọc hơn
+                pagination={{ pageSize: 5 }}
+                scroll={{ x: 'max-content' }}
+                size="middle"
             />
         </Modal>
     );

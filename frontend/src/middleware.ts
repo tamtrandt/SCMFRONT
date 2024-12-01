@@ -4,53 +4,48 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-    const accessToken = request.cookies.get('access_token')?.value; // Lấy access token từ cookies
-    const pathname = request.nextUrl.pathname; // Đường dẫn hiện tại
+    const accessToken = request.cookies.get('access_token')?.value; // Get access token from cookies
+    const pathname = request.nextUrl.pathname; // Current path
 
-    if (
-        pathname === '/' || 
-        pathname === '/auth/register' || 
-        pathname === '/auth/verify' || 
-        pathname === '/auth/login'
-    ) {
+    // Allow access to these public pages without authentication
+    const publicPaths = ['/', '/auth/register', '/auth/verify', '/auth/login'];
+    if (publicPaths.includes(pathname)) {
         return NextResponse.next();
     }
 
-    // Nếu không có access token và không phải trang login, chuyển hướng về trang đăng nhập
+    // Redirect to login if no access token and not on a public page
     if (!accessToken) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
-    // Nếu có access token, kiểm tra role và phân quyền
-    if (accessToken) {
-        const { role } = decodeToken(accessToken);
+    // If access token exists, decode the token and check user role
+    const { role } = decodeToken(accessToken);
 
-        // Phân quyền dựa trên role
-        if (role === 'customer' && pathname === '/dashboard') {
-            return NextResponse.redirect(new URL('/home', request.url));
-        }
-
-        if (role === 'admin' && pathname === '/home') {
-            return NextResponse.redirect(new URL('/dashboard', request.url));
-        }
+    // Redirect based on role and current path
+    if (role === 'customer' && pathname === '/dashboard') {
+        return NextResponse.redirect(new URL('/home', request.url));
     }
 
-    // Cho phép truy cập nếu không có vi phạm phân quyền
+    if (role === 'admin' && pathname === '/home') {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+
+    // Allow access if no role restrictions are violated
     return NextResponse.next();
 }
 
-// Hàm giải mã JWT, thêm xử lý lỗi nếu token không hợp lệ
-function decodeToken(token: any) {
+// Function to decode JWT and handle errors if the token is invalid
+function decodeToken(token: string) {
     try {
         const base64Url = token.split('.')[1];
         const decodedValue = JSON.parse(Buffer.from(base64Url, 'base64').toString());
         return decodedValue;
     } catch (error) {
         console.error('Invalid token:', error);
-        return { role: null };
+        return { role: null }; // Return a default role when decoding fails
     }
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image).*)'], // Áp dụng cho tất cả các route trừ API và static
+    matcher: ['/((?!api|_next/static|_next/image).*)'], // Apply to all routes except API and static assets
 };

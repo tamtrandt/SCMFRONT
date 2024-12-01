@@ -28,28 +28,18 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
     const [productData, setProductData] = useState<GetProductOnChain | null>(null);
     const [selectedCids, setSelectedCids] = useState<string[]>([]);
 
-
-
-
-
     useEffect(() => {
         if (productId) {
-            // Fetch product data and populate form (giả định một hàm fetchProductById)
             getProductOnChain(productId).then((product) => {
-                form.setFieldsValue({
-                    ...product, // Make sure the product data gets set
-                    id: productId, // Explicitly set the product ID in the form fields
-                });
+                form.setFieldsValue({ ...product, id: productId });
                 setProductData(product);
                 setProductType(product.category);
             });
         }
     }, [productId, form]);
 
-    // Lấy giá trị từ form
     const imagecids = form.getFieldValue('imagecids') || [];
     const filecids = form.getFieldValue('filecids') || [];
-
 
     const handleEditModalOk = async () => {
         try {
@@ -69,24 +59,14 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
 
             const filteredImageCids = filteredCids(imagecids);
             const filteredFileCids = filteredCids(filecids);
-            filteredImageCids.forEach((cid: string) => formData.append('imagecids', cid));
-            filteredFileCids.forEach((cid: string) => formData.append('filecids', cid));
-            newFiles.forEach(file => formData.append('newFiles', file));
+            filteredImageCids.forEach((cid) => formData.append('imagecids', cid));
+            filteredFileCids.forEach((cid) => formData.append('filecids', cid));
+            newFiles.forEach((file) => formData.append('newFiles', file));
 
-
-
-
-
-            // Log payload để kiểm tra
-
-            // Update product logic (giả định một hàm updateProduct)
             await updateMetadata(productId, formData);
             onUpdateSuccess();
 
-            notification.success({
-                message: 'Product updated successfully',
-            });
-
+            notification.success({ message: 'Product updated successfully' });
             onClose();
             form.resetFields();
             setFileList([]);
@@ -94,67 +74,47 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             setSelectedCids([]);
         } catch (error) {
             console.error('Error updating product:', error);
-            notification.error({
-                message: 'Error updating product',
-                description: 'An error occurred while updating the product.',
-            });
+            notification.error({ message: 'Error updating product', description: 'An error occurred while updating the product.' });
         } finally {
             setLoading(false);
             onClose();
         }
     };
 
-    // Hàm cập nhật giá (Price)
     const handleUpdatePrice = async () => {
         try {
-            const values = await form.validateFields(); // Validate form
+            const values = await form.validateFields();
             setLoading(true);
-            const price = values.price.toString();  // Ensure price is a string
-            // Call the API to update the price
+            const price = values.price.toString();
             await updatePrice(productId, price);
 
-            notification.success({
-                message: 'Price updated successfully',
-            });
-
-            onUpdateSuccess(); // Gọi callback
+            notification.success({ message: 'Price updated successfully' });
+            onUpdateSuccess();
         } catch (error) {
             console.error('Error updating price:', error);
-            notification.error({
-                message: 'Error updating price',
-                description: 'An error occurred while updating the price.',
-            });
+            notification.error({ message: 'Error updating price', description: 'An error occurred while updating the price.' });
         } finally {
-            setLoading(false); // Set loading to false after completion
+            setLoading(false);
             onClose();
         }
     };
 
-
-    // Hàm cập nhật số lượng (Quantity)
     const handleUpdateQuantity = async () => {
         try {
-            const values = await form.validateFields(); // Validate form
+            const values = await form.validateFields();
             setLoading(true);
             await updateQuantity(productId, values.quantity);
 
-            notification.success({
-                message: 'Quantity updated successfully',
-            });
-
-            onUpdateSuccess(); // Gọi callback
+            notification.success({ message: 'Quantity updated successfully' });
+            onUpdateSuccess();
         } catch (error) {
             console.error('Error updating quantity:', error);
-            notification.error({
-                message: 'Error updating quantity',
-                description: 'An error occurred while updating the quantity.',
-            });
+            notification.error({ message: 'Error updating quantity', description: 'An error occurred while updating the quantity.' });
         } finally {
-            setLoading(false); // Set loading to false after completion
+            setLoading(false);
             onClose();
         }
     };
-
 
     const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
         const validatedList = validateFileUpload(newFileList, imageList, 5, notification);
@@ -169,26 +129,19 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
             setImageList(validatedList);
         }
     };
-    // Hàm xử lý tick checkbox cho cả image và file
+
     const handleDeleteCid = (cid: string) => {
         setSelectedCids((prev) => {
             if (prev.includes(cid)) {
-                return prev.filter(item => item !== cid);
+                return prev.filter((item) => item !== cid);
             } else {
                 return [...prev, cid];
             }
         });
     };
 
-    // Lọc các CIDs không được chọn
     const filteredCids = (cids: string[]) => {
-        return cids.filter((cid: string) => {
-            const isCidOut = !selectedCids.includes(cid);
-            if (!isCidOut) {
-                console.log(`CID bị bỏ đi: ${cid}`);
-            }
-            return isCidOut;
-        });
+        return cids.filter((cid) => !selectedCids.includes(cid));
     };
 
 
@@ -290,7 +243,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                         </Form.Item>
                     </Col>
                     <Col span={6}>
-                        <Form.Item label="Brand" name="brand" rules={[{ required: true, message: 'Please select the brand!' }]}>
+                        <Form.Item label="Collection" name="brand" rules={[{ required: true, message: 'Please select the brand!' }]}>
                             <Select placeholder="Select Brand">
                                 {Object.values(Brand).map((brand) => (
                                     <Select.Option key={brand} value={brand}>{brand}</Select.Option>
@@ -320,15 +273,16 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                     </Col>
                 </Row>
 
-
                 <Row gutter={24}>
+                    {/* Labels and delete section */}
                     <Col span={24}>
                         <label style={{ fontSize: '16px', fontWeight: 'normal' }}>
                             Select the images and files you want to <span style={{ fontWeight: 'bold', color: 'red' }}>DELETE</span>
                         </label>
                     </Col>
+
+                    {/* Current Images */}
                     <Col span={12}>
-                        {/* Hiển thị Image CIDs */}
                         <Form.Item label="Current Images" style={{ marginBottom: 16 }}>
                             <List
                                 bordered
@@ -336,14 +290,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                                 renderItem={(cid: string) => {
                                     const cleanCid = cid.replace('ipfs://', '');
                                     return (
-                                        <List.Item
-                                            actions={[
-                                                <Checkbox onChange={() => handleDeleteCid(cid)} />
-
-
-
-                                            ]}
-                                        >
+                                        <List.Item actions={[<Checkbox onChange={() => handleDeleteCid(cid)} />]}>
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <img
                                                     src={`https://ipfs.io/ipfs/${cleanCid}`}
@@ -357,6 +304,8 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                             />
                         </Form.Item>
                     </Col>
+
+                    {/* Current Files */}
                     <Col span={12}>
                         <Form.Item label="Current Files" style={{ marginBottom: 16 }}>
                             <List
@@ -365,14 +314,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                                 renderItem={(cid: string) => {
                                     const cleanCid = cid.replace('ipfs://', '');
                                     return (
-                                        <List.Item
-                                            actions={[
-                                                <Checkbox onChange={() => handleDeleteCid(cid)} />
-
-
-
-                                            ]}
-                                        >
+                                        <List.Item actions={[<Checkbox onChange={() => handleDeleteCid(cid)} />]}>
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <a
                                                     href={`https://ipfs.io/ipfs/${cleanCid}`}
@@ -388,11 +330,9 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                                 }}
                             />
                         </Form.Item>
-
                     </Col>
                 </Row>
-
-
+                {/* Upload Images */}
                 <Form.Item
                     label="Upload Images (JPG, PNG, JPEG only)"
                     style={{ marginBottom: 16 }}
@@ -420,6 +360,7 @@ export const UpdateModal: React.FC<UpdateModalProps> = ({ visible, productId, on
                     </Upload>
                 </Form.Item>
 
+                {/* Upload Files */}
                 <Form.Item
                     label="Upload Files (TXT, PDF, DOC only)"
                     style={{ marginBottom: 16 }}

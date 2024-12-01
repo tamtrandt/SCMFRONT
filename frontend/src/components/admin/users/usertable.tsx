@@ -3,7 +3,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Button, Table, notification, Spin, Modal, Form, Input, Select, message, } from "antd";
-import { getAllUsers, deleteUser, createUser, updateUser } from '@/api/users'; // Đường dẫn tới file users.ts
+import { getAllUsers, deleteUser, createUser, updateUser } from '@/api/users';
 import { UpdateUser } from '@/components/utils/interfaces';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import Cookies from 'js-cookie';
@@ -13,21 +13,18 @@ import FormatAndCopyHash from '@/components/componentspage/hash';
 import Title from 'antd/es/typography/Title';
 
 
-// Import modal cập nhật
-
 const UserTable = () => {
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    const [visibleCreateModal, setVisibleCreateModal] = useState(false); // State cho modal tạo mới
+    const [visibleCreateModal, setVisibleCreateModal] = useState(false);
     const [currentUser, setCurrentUser] = useState<any>(null);
     const [createFormData, setCreateFormData] = useState<{ email: string; password: string; role: string }>({ email: '', password: '', role: 'customer' }); // State cho form tạo mới
-    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // State cho modal cập nhật
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [form] = Form.useForm();
-    // State cho tìm kiếm, lọc, sắp xếp
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortOrder, setSortOrder] = useState('ascend'); // 'ascend' hoặc 'descend'
-    const [filterRole, setFilterRole] = useState(''); // 'admin', 'customer', hoặc '
+    const [sortOrder, setSortOrder] = useState('ascend');
+    const [filterRole, setFilterRole] = useState('');
     const [isActiveFilter, setIsActiveFilter] = useState('');
 
     const handleSearch = (value: any) => {
@@ -37,46 +34,35 @@ const UserTable = () => {
     const filteredUsers = users
         .filter(user =>
             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) || // Kiểm tra user.username có tồn tại
-            (user.user_id && user.user_id.toLowerCase().includes(searchTerm.toLowerCase())) || // Kiểm tra user.user_id có tồn tại
-            (user.phone && user.phone.toLowerCase().includes(searchTerm.toLowerCase())) // Kiểm tra user.phone có tồn tại
+            (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (user.user_id && user.user_id.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (user.phone && user.phone.toLowerCase().includes(searchTerm.toLowerCase()))
         )
         .filter(user => {
             const roleMatch = !filterRole || user.role === filterRole;
 
-            // Chỉ định trạng thái active hoặc not-active
             const isActiveMatch =
-                (isActiveFilter === "" || isActiveFilter === "all") || // Cho phép tất cả khi không có filter
-                (isActiveFilter === "active" && user.isactive) || // Kiểm tra trạng thái Active
-                (isActiveFilter === "not-active" && !user.isactive); // Kiểm tra trạng thái Not Active
+                (isActiveFilter === "" || isActiveFilter === "all") ||
+                (isActiveFilter === "active" && user.isactive) ||
+                (isActiveFilter === "not-active" && !user.isactive);
 
-            return roleMatch && isActiveMatch; // Lọc theo cả hai
+            return roleMatch && isActiveMatch;
         })
         .sort((a, b) => {
             switch (sortOrder) {
                 case "abcAsc":
-                    return (a.username || "").localeCompare(b.username || ""); // Sắp xếp theo tên A-Z
+                    return (a.username || "").localeCompare(b.username || "");
                 case "abcDesc":
-                    return (b.username || "").localeCompare(a.username || ""); // Sắp xếp theo tên Z-A
+                    return (b.username || "").localeCompare(a.username || "");
                 case "createdAtAsc":
-                    return +new Date(a.create_at as string) - +new Date(b.create_at as string); // Sắp xếp theo ngày tạo (cũ nhất trước)
+                    return +new Date(a.create_at as string) - +new Date(b.create_at as string);
                 case "createdAtDesc":
-                    return +new Date(b.create_at as string) - +new Date(a.create_at as string); // Sắp xếp theo ngày tạo (mới nhất trước)
+                    return +new Date(b.create_at as string) - +new Date(a.create_at as string);
                 default:
-                    return 0; // Không sắp xếp
+                    return 0;
             }
 
         });
-
-
-
-
-
-
-
-
-
-
 
     const fetchUserData = async () => {
         try {
@@ -100,8 +86,8 @@ const UserTable = () => {
         try {
             const response = await updateUser(currentUser.user_id, updateData);
             message.success(response.message);
-            fetchUserData(); // Gọi lại hàm để làm mới danh sách người dùng
-            setIsUpdateModalOpen(false); // Đóng modal
+            fetchUserData();
+            setIsUpdateModalOpen(false);
         } catch (err) {
             message.error(err instanceof Error ? err.message : "Update failed");
         }
@@ -109,11 +95,11 @@ const UserTable = () => {
 
     const handleCreate = async () => {
         try {
-            await createUser(createFormData); // Gọi API để tạo người dùng
+            await createUser(createFormData);
             notification.success({ message: 'User created successfully!' });
-            fetchUserData(); // Cập nhật danh sách người dùng
-            setVisibleCreateModal(false); // Đóng modal
-            setCreateFormData({ email: '', password: '', role: '' }); // Reset form
+            fetchUserData();
+            setVisibleCreateModal(false);
+            setCreateFormData({ email: '', password: '', role: '' });
         } catch (error) {
             console.error('Error creating user:', error);
             notification.error({ message: error instanceof Error ? error.message || 'Failed to create user' : 'An unknown error occurred' });
@@ -123,7 +109,7 @@ const UserTable = () => {
     const handleDelete = async (userId: string) => {
         const storedUserData = localStorage.getItem("user_data");
         const storedUser = storedUserData ? JSON.parse(storedUserData) : null;
-        const currentUserId = storedUser?.sub; // Giả sử user_data chứa user_id
+        const currentUserId = storedUser?.sub;
 
         const isCurrentUser = userId === currentUserId;
 
@@ -133,11 +119,11 @@ const UserTable = () => {
                 content: 'Deleting your own account will log you out and remove all your data.',
                 onOk: async () => {
                     try {
-                        await deleteUser(userId); // Gọi hàm xóa tài khoản
+                        await deleteUser(userId);
                         Cookies.remove("access_token");
                         localStorage.removeItem("user_data");
                         notification.success({ message: 'Your account has been deleted successfully!' });
-                        router.push("/auth/login"); // Chuyển hướng về trang đăng nhập
+                        router.push("/auth/login");
                     } catch (error) {
                         console.error('Error deleting user:', error);
                         notification.error({ message: 'Failed to delete user' });
@@ -149,9 +135,9 @@ const UserTable = () => {
                 title: 'Are you sure you want to delete this user?',
                 onOk: async () => {
                     try {
-                        await deleteUser(userId); // Gọi hàm xóa tài khoản
+                        await deleteUser(userId);
                         notification.success({ message: 'User deleted successfully!' });
-                        fetchUserData(); // Cập nhật danh sách người dùng
+                        fetchUserData();
                     } catch (error) {
                         console.error('Error deleting user:', error);
                         notification.error({ message: 'Failed to delete user' });
@@ -208,7 +194,7 @@ const UserTable = () => {
                         icon={<EditOutlined />}
                         onClick={() => {
                             setCurrentUser(record);
-                            setIsUpdateModalOpen(true); // Mở modal cập nhật
+                            setIsUpdateModalOpen(true);
                         }}
                         type="primary"
                         style={{ marginRight: 8 }}
@@ -225,12 +211,12 @@ const UserTable = () => {
     ];
 
     const handleOkCreate = () => {
-        handleCreate(); // Gọi hàm tạo mới khi nhấn OK trong modal
+        handleCreate();
     };
 
     const handleCancelCreate = () => {
         setVisibleCreateModal(false);
-        setCreateFormData({ email: '', password: '', role: 'customer' }); // Reset form
+        setCreateFormData({ email: '', password: '', role: 'customer' });
     };
 
     if (loading) {
@@ -257,13 +243,13 @@ const UserTable = () => {
                         onChange={(value) => {
                             if (value === "admin" || value === "customer") {
                                 setFilterRole(value);
-                                setIsActiveFilter(""); // Đặt lại trạng thái khi chọn vai trò
+                                setIsActiveFilter("");
                             } else if (value === "active" || value === "not-active") {
                                 setIsActiveFilter(value);
-                                setFilterRole(""); // Đặt lại vai trò khi chọn trạng thái
+                                setFilterRole("");
                             } else {
-                                setFilterRole(""); // Xóa vai trò khi chọn All
-                                setIsActiveFilter(""); // Đặt lại trạng thái khi chọn All
+                                setFilterRole("");
+                                setIsActiveFilter("");
                             }
                         }}
                         style={{ width: 100, marginRight: 20 }}
@@ -304,24 +290,6 @@ const UserTable = () => {
                 )}
             </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            {/* Modal tạo người dùng mới */}
             <Modal
                 title="Create User"
                 open={visibleCreateModal}
@@ -357,7 +325,6 @@ const UserTable = () => {
                 </Form>
             </Modal>
 
-            {/* Modal cập nhật thông tin người dùng */}
             <UpdateProfileModal
                 visible={isUpdateModalOpen}
                 onCancel={() => setIsUpdateModalOpen(false)}

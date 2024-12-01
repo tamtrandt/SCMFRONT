@@ -16,7 +16,7 @@ const Register = () => {
 
     const onFinish = async (values: any) => {
         try {
-            // Gọi hàm registerUser từ auth.ts
+
             await registerUser(values);
             message.success("Registration successful! Check your email for verification.");
             router.push("/auth/verify");

@@ -1,119 +1,90 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// src/services/product.ts
-
-
 import { CreateProduct } from "@/components/utils/interfaces";
 import { fetchAPI } from "./fetch";
 
-
-
-// Hàm gọi API để tạo sản phẩm
+// Create product
 export const createProduct = async (product: CreateProduct) => {
   const formData = new FormData();
 
-  // Add các trường vào formData
+  // Append product data to formData
   formData.append('name', product.name);
   formData.append('description', product.description);
   formData.append('price', product.price.toString());
   formData.append('quantity', product.quantity.toString());
-  formData.append('brand', product.brand); // Thêm brand
+  formData.append('brand', product.brand);
   formData.append('category', product.category);
-  formData.append('size', product.size);   // Thêm size
+  formData.append('size', product.size);
 
-  // Add các file vào formData
+  // Add files to formData
   product.files.forEach((file) => {
-      formData.append('files', file); // Nếu backend yêu cầu field khác, đổi 'files' thành tên field chính xác
+    formData.append('files', file);
   });
 
   try {
-      // Sử dụng hàm fetchAPI, không cần convert formData thành JSON
-      const data = await fetchAPI('/products', {
-          method: 'POST',
-          body: formData, // Gửi formData trực tiếp
-      });
-      return data; // Trả về dữ liệu sau khi thành công
+    const data = await fetchAPI('/products', {
+      method: 'POST',
+      body: formData,
+    });
+    return data;
   } catch (error) {
-      console.error('Error creating product:', error);
-      throw error; // Ném lỗi ra để frontend có thể xử lý
+    console.error('Error creating product:', error);
+    throw error;
   }
 };
 
-
-export const updateMetadata = async (id: number , productData: any) => {
+// Update product metadata
+export const updateMetadata = async (id: number, productData: any) => {
   const data = await fetchAPI(`/products/update/${id}/metadata`, {
-        method: 'PUT',
-        body: productData,
-      });
-      console.log(data);
-      return data;
-     
+    method: 'PUT',
+    body: productData,
+  });
+  console.log(data);
+  return data;
 };
-// Gọi API update giá
-export const updatePrice = async (id: number,  price: any ) => {
+
+// Update product price
+export const updatePrice = async (id: number, price: any) => {
   const data = await fetchAPI(`/products/update/${id}/price`, {
-      method: 'PATCH', 
-     body: {price},  
+    method: 'PATCH',
+    body: { price },
   });
   return data;
 };
 
-// Gọi API update số lượng
+// Update product quantity
 export const updateQuantity = async (id: number, quantity: any) => {
-    const data = await fetchAPI(`/products/update/${id}/quantity`, {
-      method: 'PATCH',
-      body: {quantity},  
-    });
-return data;
-   
+  const data = await fetchAPI(`/products/update/${id}/quantity`, {
+    method: 'PATCH',
+    body: { quantity },
+  });
+  return data;
 };
 
-
-
-    
-
-// Hàm gọi API để lấy tất cả sản phẩm
-// export const getAllProductOffChain = async () => {
-//   try {
-//     // Gọi API lấy danh sách sản phẩm từ endpoint
-//     const data = await fetchAPI('/products/offchainall/all', {
-//       method: 'GET',
-//     });
-
-//     return data; // Trả về dữ liệu sau khi thành công
-//   } catch (error) {
-//     console.error('Error fetching products:', error);
-//     throw error; // Ném lỗi ra để frontend có thể xử lý
-//   }
-// };
-// Hàm gọi API để lấy sản phẩm theo ID OFF CHAIN
+// Get product by ID (Off-chain)
 export const getProductOffChain = async (id: number) => {
   try {
     const data = await fetchAPI(`/products/offchain/${id}`, {
       method: 'GET',
     });
-
-    return data; 
+    return data;
   } catch (error) {
     console.error('Error fetching product by ID:', error);
-    throw error; 
+    throw error;
   }
 };
 
-
-// Hàm gọi API để lấy sản phẩm theo ID ON CHAIN
-// Hàm chuyển đổi IPFS URL sang HTTP URL
+// Resolve IPFS URL
 const resolveIpfsUrl = (url: string) => {
   if (url.startsWith('ipfs://')) {
-    // Thay thế bằng gateway IPFS
     return url.replace('ipfs://', 'https://ipfs.io/ipfs/');
   }
   return url;
 };
 
+// Get product by ID (On-chain)
 export const getProductOnChain = async (id: number) => {
   try {
-    // Gọi API lấy dữ liệu sản phẩm từ blockchain
     const data = await fetchAPI(`/products/onchain/${id}`, {
       method: 'GET',
     });
@@ -122,16 +93,16 @@ export const getProductOnChain = async (id: number) => {
       throw new Error('Invalid data format from API');
     }
 
-    // Resolve URL metadata
     const metadataUrl = resolveIpfsUrl(data.data.metadata);
     const metadataResponse = await fetch(metadataUrl);
+
     if (!metadataResponse.ok) {
       throw new Error('Failed to fetch metadata');
     }
+
     const metadata = await metadataResponse.json();
     const price = parseFloat(data.data.price).toFixed(2);
 
-    // Xử lý dữ liệu và trả về kết quả
     return {
       id: data.data.tokenId,
       name: metadata.name,
@@ -153,31 +124,27 @@ export const getProductOnChain = async (id: number) => {
   }
 };
 
-// Hàm gọi API để lấy all sản phẩm 
+// Get all products (On-chain)
 export const getAllProductOnChain = async () => {
   try {
     const data = await fetchAPI(`/products/onchainall/all`, {
       method: 'GET',
     });
-
-    return data; 
+    return data;
   } catch (error) {
-    console.error('Error fetching product by ID:', error);
-    throw error; 
+    console.error('Error fetching products:', error);
+    throw error;
   }
 };
 
-
+// Delete product
 export const deleteProduct = async (id: number) => {
-     return await fetchAPI(`/products/delete/${id}`, { 
-      method: 'DELETE',
-    });
+  return await fetchAPI(`/products/delete/${id}`, {
+    method: 'DELETE',
+  });
 };
 
-
-
-
-
+// Buy tokens
 export const buyTokens = async (tokenIds: number[], amounts: number[], totalPrice: string) => {
   const payload = {
     tokenIds,
@@ -190,15 +157,12 @@ export const buyTokens = async (tokenIds: number[], amounts: number[], totalPric
       method: 'POST',
       body: payload,
     });
-    return response;  // Trả về dữ liệu từ API
+    return response;
   } catch (error) {
     console.error('Error buying tokens:', error);
     throw error;
   }
 };
-
-
-
 
 
 

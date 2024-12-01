@@ -5,7 +5,6 @@ import { Modal, Button, Table, InputNumber, message, Popconfirm } from 'antd';
 import { DeleteOutlined, PlusOutlined, MinusOutlined } from '@ant-design/icons';
 import { CartItem } from '@/components/utils/interfaces';
 import { buyTokens } from '@/api/product';
-
 interface CartModalProps {
     visible: boolean;
     onClose: () => void;
@@ -28,7 +27,6 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
         }
     }, [visible]);
 
-    // Tính tổng giá trị của giỏ hàng
     const calculateTotalPrice = (cart: any[]) => {
         const total = cart.reduce(
             (sum: number, item: any) => sum + item.price * item.quantity,
@@ -37,7 +35,6 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
         setTotalPrice(total);
     };
 
-    // Hàm cập nhật số lượng sản phẩm
     const handleUpdateQuantity = (id: number, newQuantity: number) => {
         if (newQuantity <= 0) {
             message.error('Quantity must be greater than 0!');
@@ -46,12 +43,11 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
 
         const updatedCart = cartData.map((item) => {
             if (item.id === id) {
-                // Kiểm tra nếu vượt quá số lượng tồn kho
                 if (newQuantity > item.availableQuantity) {
                     message.error(`Only ${item.availableQuantity} items available in stock!`);
-                    return item; // Giữ nguyên giá trị nếu vượt quá
+                    return item;
                 }
-                return { ...item, quantity: newQuantity }; // Cập nhật số lượng
+                return { ...item, quantity: newQuantity };
             }
             return item;
         });
@@ -61,7 +57,6 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
         calculateTotalPrice(updatedCart);
     };
 
-    // Xóa sản phẩm khỏi giỏ hàng
     const handleDeleteProduct = (id: number) => {
         const updatedCart = cartData.filter((item: any) => item.id !== id);
         setCartData(updatedCart);
@@ -70,7 +65,6 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
         message.success('Product removed from cart!');
     };
 
-    // Xóa toàn bộ giỏ hàng
     const handleClearCart = () => {
         localStorage.removeItem('cart');
         setCartData([]);
@@ -84,27 +78,22 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
             return;
         }
 
-        // Chuẩn bị dữ liệu từ giỏ hàng
-        const tokenIds = cartData.map(item => item.id);  // ID các token cần mua
-        const amounts = cartData.map(item => item.quantity);  // Số lượng mỗi token cần mua
-        const totalPrice = (cartData.reduce((sum, item) => sum + item.price * item.quantity, 0)).toString();  // Tổng giá trị giỏ hàng
+        const tokenIds = cartData.map(item => item.id);
+        const amounts = cartData.map(item => item.quantity);
+        const totalPrice = cartData.reduce((sum, item) => sum + item.price * item.quantity, 0).toString();
 
         try {
-            // Gọi API mua token
-            await buyTokens(tokenIds, amounts, totalPrice);  // Gọi API với thông tin từ giỏ hàng
-
-            // Sau khi giao dịch thành công
+            await buyTokens(tokenIds, amounts, totalPrice);
             message.success('Purchase successful!');
-            localStorage.removeItem('cart');  // Xóa giỏ hàng
-            setCartData([]);  // Cập nhật lại giỏ hàng
-            setTotalPrice(0);  // Cập nhật lại tổng giá trị
+            localStorage.removeItem('cart');
+            setCartData([]);
+            setTotalPrice(0);
         } catch (error) {
             console.error('Error during purchase:', error);
             message.error('Purchase failed. Please try again.');
         }
     };
 
-    // Cột trong bảng
     const columns = [
         {
             title: 'Product ID',
@@ -127,30 +116,27 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
             key: 'quantity',
             render: (record: any) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    {/* Nút giảm số lượng */}
                     <Button
                         icon={<MinusOutlined />}
                         size="small"
                         onClick={() => handleUpdateQuantity(record.id, record.quantity - 1)}
-                        disabled={record.quantity <= 1} // Vô hiệu hóa khi số lượng <= 1
+                        disabled={record.quantity <= 1}
                     />
-                    {/* Input số lượng */}
                     <InputNumber
                         min={1}
-                        max={record.availableQuantity} // Giới hạn tối đa là số lượng tồn kho
+                        max={record.availableQuantity}
                         value={record.quantity}
                         onChange={(value) => {
                             if (value) {
-                                handleUpdateQuantity(record.id, value); // Cập nhật ngay khi thay đổi
+                                handleUpdateQuantity(record.id, value);
                             }
                         }}
                     />
-                    {/* Nút tăng số lượng */}
                     <Button
                         icon={<PlusOutlined />}
                         size="small"
                         onClick={() => handleUpdateQuantity(record.id, record.quantity + 1)}
-                        disabled={record.quantity >= record.availableQuantity} // Vô hiệu hóa khi đạt giới hạn
+                        disabled={record.quantity >= record.availableQuantity}
                     />
                 </div>
             ),
@@ -191,15 +177,12 @@ const CartModal: React.FC<CartModalProps> = ({ visible, onClose }) => {
             ]}
             width={800}
         >
-            {/* Table hiển thị giỏ hàng */}
             <Table
                 dataSource={cartData}
                 columns={columns}
                 rowKey="id"
                 pagination={false}
             />
-
-            {/* Tổng giá tiền */}
             <div style={{ textAlign: 'right', marginTop: '20px' }}>
                 <strong>Total Price: </strong>
                 <span style={{ fontSize: '16px', color: '#1890ff' }}>

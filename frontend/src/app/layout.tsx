@@ -7,7 +7,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <body>
         <AntdRegistry>
-          <main>{children}</main> {/* Sử dụng main cho nội dung chính */}
+          <main>{children}</main>
         </AntdRegistry>
       </body>
     </html>

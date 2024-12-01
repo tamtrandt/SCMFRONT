@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// ProductForm.tsx
 'use client'
 import { useState } from 'react';
 import { Button, Modal, Form, Input, InputNumber, Upload, notification, Row, Col, Select } from 'antd';
@@ -87,7 +86,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                         { required: true, message: 'Please input the product name!' },
                     ]}
                     style={{ marginBottom: 16 }}
-                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
+                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }}
                 >
                     <Input style={{ borderRadius: 4, padding: '8px 12px' }} />
                 </Form.Item>
@@ -107,12 +106,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                         }
                     ]}
                     style={{ marginBottom: 16 }}
-                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }} // Inline CSS cho label
+                    labelCol={{ style: { fontWeight: 'bold', color: '#4CAF50', fontSize: '16px' } }}
                 >
                     <Input.TextArea style={{ borderRadius: 4, padding: '8px 12px' }} rows={3} />
                 </Form.Item>
-
-
 
                 <Row gutter={24}>
                     <Col span={12}>
@@ -123,15 +120,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
                                 { required: true, message: 'Please input the product price!' },
                                 {
                                     validator: (_, value) => {
-                                        // Kiểm tra xem giá trị có phải là số hay không
+
                                         if (typeof value !== 'number') {
                                             return Promise.reject(new Error('Price must be a number'));
                                         }
-                                        // Kiểm tra nếu giá nhỏ hơn 0
+
                                         if (value < 0) {
                                             return Promise.reject(new Error('Price must be a positive number'));
                                         }
-                                        // Kiểm tra định dạng để đảm bảo giá có tối đa hai chữ số thập phân
+
                                         if (!/^\d+(\.\d{1,2})?$/.test(value.toString())) {
                                             return Promise.reject(new Error('Price must be a valid number with up to two decimal places'));
                                         }
@@ -170,7 +167,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onProductCre
 
                 <Row gutter={24}>
                     <Col span={12}>
-                        <Form.Item label="Brand" name="brand" rules={[{ required: true, message: 'Please select the brand!' }]}>
+                        <Form.Item label="Collection" name="brand" rules={[{ required: true, message: 'Please select the brand!' }]}>
                             <Select placeholder="Select Brand">
                                 {Object.values(Brand).map((brand) => (
                                     <Select.Option key={brand} value={brand}>{brand}</Select.Option>

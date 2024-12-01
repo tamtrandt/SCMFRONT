@@ -7,13 +7,9 @@ import Menu from "antd/es/menu";
 import {
     DashboardOutlined,
     DropboxOutlined,
-    FolderOpenOutlined,
     LinkOutlined,
     ProductOutlined,
-    RocketOutlined,
-    ShoppingCartOutlined,
     ShoppingOutlined,
-    TeamOutlined,
     WalletOutlined
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';

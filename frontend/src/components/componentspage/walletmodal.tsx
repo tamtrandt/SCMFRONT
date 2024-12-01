@@ -17,7 +17,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ visible, onClose }) => {
         >
             <WalletConnector onConnect={(provider, signer) => {
                 console.log("Wallet connected:", provider, signer);
-                onClose(); // Close the modal after successful connection
+                onClose();
             }} />
         </Modal>
     );

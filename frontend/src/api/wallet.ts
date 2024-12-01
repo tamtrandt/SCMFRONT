@@ -1,6 +1,5 @@
 import { fetchAPI } from "./fetch";
 
-
 export const sendWalletAddressToBackend = async (address: string): Promise<string> => {
   try {
     const response = await fetchAPI('/smartcontract/connectWallet', {
@@ -10,14 +9,12 @@ export const sendWalletAddressToBackend = async (address: string): Promise<strin
 
     console.log('Response from backend:', response);
 
-    // Đổi từ "token" thành "WalletToken"
     const { WalletToken } = response;
     if (!WalletToken) {
       throw new Error('No WalletToken returned from backend');
     }
 
-    sessionStorage.setItem('WalletToken', WalletToken); // Lưu vào sessionStorage
-
+    sessionStorage.setItem('WalletToken', WalletToken);
     console.log('WalletToken saved to sessionStorage successfully.');
     return WalletToken;
   } catch (error) {

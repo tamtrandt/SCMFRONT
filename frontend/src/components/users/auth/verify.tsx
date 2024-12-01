@@ -17,7 +17,7 @@ const Verify = () => {
 
     const onFinish = async (values: any) => {
         try {
-            // Gọi hàm verifyEmail từ auth.ts
+
             await verifyEmail(values.code);
             message.success("Email verified successfully!");
             router.push("/auth/login");
@@ -29,7 +29,7 @@ const Verify = () => {
     const handleResendCode = async (email: any) => {
         try {
             setLoading(true);
-            await resendCode(email); // Gọi hàm resendCode từ auth.ts
+            await resendCode(email);
             message.success("Verification code resent successfully!");
             setIsModalOpen(false);
         } catch (error: any) {

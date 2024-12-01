@@ -21,7 +21,7 @@ export const QRDisplay = ({ qrcodes }: QRDisplayProps) => {
             setCurrentIndex(currentIndex - 1);
         }
     };
-    // Kiểm tra nếu không có mã QR thì sử dụng ảnh mặc định
+
     const hasQRCodes = qrcodes && qrcodes.length > 0;
     const currentQRCodeUrl = hasQRCodes
         ? qrcodes[currentIndex]
