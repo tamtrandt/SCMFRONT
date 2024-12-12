@@ -25,6 +25,7 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
             try {
                 const data = await getProductOffChain(id);
                 setProducts(data);
+                console.log(data);
             } catch {
                 setError('Failed to fetch product details.');
             } finally {
@@ -55,9 +56,9 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
             key: 'action',
         },
         {
-            title: 'Initiator',
-            dataIndex: ['event', 'initiator'],
-            key: 'initiator',
+            title: 'Creator',
+            dataIndex: ['event', 'creator'],
+            key: 'creator',
             render: (text: string) => <FormatAndCopyHash hash={text} />,
         },
         {
@@ -67,11 +68,12 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
             render: (text: string) => new Date(text).toLocaleString('en-US', { hour12: false }),
         },
         {
-            title: 'Additional Info',
-            dataIndex: ['event', 'additionalInfo'],
-            key: 'additionalInfo',
-            render: (text: string) => <FormatAndCopyHash hash={text} />,
-        },
+            title: 'QR Code',
+            dataIndex: 'qrCode',
+            key: 'qrCode',
+            render: (text: string) => <img src={text} alt="QR Code" style={{ width: '100px' }} />,
+
+        }
     ];
 
     // Prepare the data for the table
@@ -79,11 +81,12 @@ export const ProductOffChainCard: React.FC<ProductOffChainCardProps> = ({ id, vi
         key: index,
         transactionHash: product.transactionHash,
         event: product.event,
+        qrCode: product.qrCode,
     }));
 
     return (
         <Modal
-            title="Product Off-Chain Details"
+            title="Transaction Details"
             open={visible}
             onCancel={onClose}
             footer={null}

@@ -5,7 +5,7 @@
 import { deleteProduct, getProductOnChain } from '@/api/product';
 import FormatAndCopyHash from '@/components/componentspage/hash';
 import { ImageDisplay } from '@/components/componentspage/image';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, HistoryOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Modal, notification, Row, Spin } from 'antd';
 import React, { useCallback, useEffect, useState } from 'react';
 import { UpdateModal } from './updatemodal';
@@ -126,7 +126,7 @@ export const ProductOnChainCard: React.FC<ProductOnChainCardProps> = ({ id, onDe
                             color: '#fff',
                         }}
                     >
-                        View Off-Chain
+                        Transactions <HistoryOutlined />
                     </Button>
 
                     {/* Off-Chain Card modal */}
