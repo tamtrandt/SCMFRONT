@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CreateProduct } from "@/components/utils/interfaces";
+import { CreateProduct, JWTPayload } from "@/components/utils/interfaces";
 import { fetchAPI } from "./fetch";
+import Cookies from 'js-cookie';
+import { jwtDecode } from "jwt-decode";
+
 
 // Create product
 export const createProduct = async (product: CreateProduct) => {
@@ -144,25 +147,48 @@ export const deleteProduct = async (id: number) => {
   });
 };
 
-// Buy tokens
 export const buyTokens = async (tokenIds: number[], amounts: number[], totalPrice: string) => {
+  // Retrieve the JWT token from cookies
+  const token = Cookies.get('access_token');
+  let email: string | null = null;
+
+  // Decode the token to extract the email
+  if (token) {
+    try {
+      const decoded = jwtDecode<JWTPayload>(token); // Decode the JWT token
+      email = decoded.email; 
+    } catch (error) {
+      console.error('Error decoding JWT:', error); 
+    }
+  }
+
+  // Check if the email exists
+  if (!email) {
+    throw new Error('You need to log in to proceed with the purchase.'); 
+  }
+
+  // Create the payload
   const payload = {
-    tokenIds,
-    amounts,
-    totalPrice,
+    tokenIds,     
+    amounts,      
+    totalPrice,   
+    email,        
   };
 
   try {
+    // Send the request to the backend
     const response = await fetchAPI('/products/buy', {
-      method: 'POST',
-      body: payload,
+      method: 'POST',     
+      body: payload,      
     });
-    return response;
+    return response;      
   } catch (error) {
-    console.error('Error buying tokens:', error);
-    throw error;
+    console.error('Error buying tokens:', error); 
+    throw error;         
   }
 };
+
+
 
 
 

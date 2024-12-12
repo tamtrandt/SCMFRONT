@@ -95,3 +95,16 @@ export interface CartItem {
     quantity: number;
     availableQuantity: number; 
 }
+
+
+
+// Interface cho payload của JWT
+ export interface JWTPayload {
+    email: string;
+    sub: string;
+    role: string;
+    isactive: boolean;
+    username: string;
+    iat: number;
+    exp: number;
+  }
