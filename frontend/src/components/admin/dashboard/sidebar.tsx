@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useContext, useState } from 'react';
@@ -36,21 +37,21 @@ const AdminSideBar: React.FC = () => {
             label: 'SCM',
             type: 'group',
             children: [
-                {
-                    key: "dashboard",
-                    label: <Link href={"/dashboard"}>Dashboard</Link>,
-                    icon: <DashboardOutlined />,
-                },
+                // {
+                //     key: "dashboard",
+                //     label: <Link href={"/dashboard"}>Dashboard</Link>,
+                //     icon: <DashboardOutlined />,
+                // },
                 {
                     key: "users",
                     label: <Link href={"/dashboard/users"}>Manage Users</Link>,
                     icon: <TeamOutlined />,
                 },
-                {
-                    key: "collection",
-                    label: <Link href={"/dashboard/users"}>Manage Collection</Link>,
-                    icon: <PartitionOutlined />,
-                },
+                // {
+                //     key: "collection",
+                //     label: <Link href={"/dashboard/users"}>Manage Collection</Link>,
+                //     icon: <PartitionOutlined />,
+                // },
                 {
                     key: "products",
                     label: 'Manage Products',
@@ -61,11 +62,11 @@ const AdminSideBar: React.FC = () => {
                             label: <Link href={"/dashboard/products"}>Storage</Link>,
                             icon: <FolderOpenOutlined />,
                         },
-                        {
-                            key: "releasing",
-                            label: <Link href={"/dashboard/releasing"}>Releasing</Link>,
-                            icon: <RocketOutlined />,
-                        },
+                        // {
+                        //     key: "releasing",
+                        //     label: <Link href={"/dashboard/releasing"}>Releasing</Link>,
+                        //     icon: <RocketOutlined />,
+                        // },
                     ],
                 },
                 {

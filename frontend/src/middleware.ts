@@ -23,11 +23,11 @@ export function middleware(request: NextRequest) {
 
     // Redirect based on role and current path
     if (role === 'customer' && pathname === '/dashboard') {
-        return NextResponse.redirect(new URL('/home', request.url));
+        return NextResponse.redirect(new URL('/home/products', request.url));
     }
 
     if (role === 'admin' && pathname === '/home') {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        return NextResponse.redirect(new URL('/dashboard/products', request.url));
     }
 
     // Allow access if no role restrictions are violated

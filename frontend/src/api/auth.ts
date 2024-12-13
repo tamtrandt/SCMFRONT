@@ -39,7 +39,7 @@ export const loginUser = async (values: Login) => {
   // Store token in cookies and user data in local storage
   Cookies.set("access_token", data.access_token, {
     path: "/",
-    expires: 24, // Expiry in hours
+    expires: 24, 
   });
 
   localStorage.setItem("user_data", JSON.stringify(userObject));

@@ -42,11 +42,11 @@ const AppSideBar: React.FC = () => {
             label: 'SCM',
             type: 'group',
             children: [
-                {
-                    key: "home",
-                    label: <Link href={"/home"}>Home</Link>,
-                    icon: <DashboardOutlined />,
-                },
+                // {
+                //     key: "home",
+                //     label: <Link href={"/home"}>Home</Link>,
+                //     icon: <DashboardOutlined />,
+                // },
                 {
                     key: "products",
                     label: <Link href={"/home/products"}>Marketplace</Link>,

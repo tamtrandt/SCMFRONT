@@ -161,12 +161,12 @@ export const ProductDetail: React.FC<ProductOnChainCardProps> = ({ id }) => {
                 </div>
 
                 <ImageDisplay imagecids={product.imagecids} />
-                <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
+                {/* <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
                     <strong>Creator:</strong>
                     <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
                         <FormatAndCopyHash hash={product.creater} />
                     </span>
-                </div>
+                </div> */}
                 <div style={{ display: 'flex', alignItems: 'center', fontWeight: 'bold', fontSize: '16px', marginBottom: '10px' }}>
                     <strong>Token Id:</strong>
                     <span style={{ marginLeft: '5px', fontWeight: 'normal' }}>
